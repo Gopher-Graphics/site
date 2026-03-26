@@ -1,0 +1,72 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: #0a0003;
+  color: #fff;
+  font-family: 'Segoe UI', 'Trebuchet MS', 'Inter', system-ui, sans-serif;
+  overflow-x: hidden;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+::selection {
+  background: rgba(122, 0, 25, 0.7);
+  color: #FFCC33;
+}
+
+button {
+  border: none;
+  background: none;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+/* Global scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: rgba(20, 0, 5, 0.3);
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 204, 51, 0.25);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 204, 51, 0.4);
+}
+
+/* Vista shine bar — apply as a child div with class "shine-bar" */
+.shine-bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 50%;
+  background: linear-gradient(180deg, rgba(255,255,255,0.22) 0%, rgba(255,255,255,0.06) 60%, transparent 100%);
+  pointer-events: none;
+  border-radius: inherit;
+}
+
+/* Responsive helpers */
+@media (max-width: 768px) {
+  body {
+    font-size: 14px;
+  }
+}
+
+/* Smooth transitions for interactive elements */
+a, button {
+  transition: all 0.18s ease;
+}
