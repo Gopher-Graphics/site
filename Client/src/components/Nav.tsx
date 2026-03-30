@@ -1,7 +1,13 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
+import { User } from "../types";
 
-export function Nav({ user, onSignIn, onSignOut }) {
+interface NavProps {
+  user: User | null;
+  onSignIn: () => void;
+}
+
+export function Nav({ user, onSignIn }: NavProps) {
   const navigate = useNavigate();
   const location = useLocation();
   const currentPath = location.pathname.substring(1) || "home";
@@ -18,13 +24,13 @@ export function Nav({ user, onSignIn, onSignOut }) {
     return () => window.removeEventListener("resize", check);
   }, []);
 
-  function navTo(p) {
+  function navTo(p: string) {
     if (p === "home") navigate("/");
     else navigate("/" + p);
     setMenuOpen(false);
   }
 
-  const linkLabel = (l) => l === "messages" ? "Messages" : l === "dashboard" ? "Dashboard" : l;
+  const linkLabel = (l: string) => l === "messages" ? "Messages" : l === "dashboard" ? "Dashboard" : l;
 
   const activeLinkClass = "btn-vista px-[18px] py-[7px] text-[13px] text-[#3a0008] capitalize";
   const inactiveLinkClass = "btn-vista px-[18px] py-[7px] text-[13px] text-[rgba(80,20,0,0.85)] capitalize";

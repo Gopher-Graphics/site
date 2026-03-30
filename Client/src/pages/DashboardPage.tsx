@@ -1,17 +1,27 @@
-import React, { useState, useRef } from "react";
+import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { SEED_MESSAGES } from "../data/mockData";
 import { ImageCropper } from "../components/ImageCropper";
+import { User, Project } from "../types";
 
-export function DashboardPage({ user, projects, onUpload, onUpdateUser, onSignOut, onDeleteProject }) {
+interface DashboardPageProps {
+  user: User;
+  projects: Project[];
+  onUpload: () => void;
+  onUpdateUser: (_userData: Partial<User>) => void;
+  onSignOut: () => void;
+  onDeleteProject: (_id: number) => void;
+}
+
+export function DashboardPage({ user, projects, onUpload, onUpdateUser, onSignOut, onDeleteProject }: DashboardPageProps) {
   const navigate = useNavigate();
   const [isEditing, setIsEditing] = useState(false);
-  const [projectToDelete, setProjectToDelete] = useState(null);
+  const [projectToDelete, setProjectToDelete] = useState<Project | null>(null);
   const [tempName, setTempName] = useState(user.name);
   const [tempRole, setTempRole] = useState(user.role);
   const [tempAvatar, setTempAvatar] = useState(user.avatar);
-  const [croppingImg, setCroppingImg] = useState(null);
-  const fileRef = useRef(null);
+  const [croppingImg, setCroppingImg] = useState<string | null>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
 
   const myProjects = projects.filter(p => p.author.startsWith(user.name.split(" ")[0]));
   const stats = [
@@ -26,11 +36,16 @@ export function DashboardPage({ user, projects, onUpload, onUpdateUser, onSignOu
     { page:"projects", icon:"GFX", title:"Project Gallery", sub:"Browse all member work" },
   ];
 
-  function handleFileSelect(e) {
-    const file = e.target.files[0];
+  function handleFileSelect(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
     if (!file) return;
     const reader = new FileReader();
-    reader.onload = (ev) => setCroppingImg(ev.target.result);
+    reader.onload = (ev) => {
+      const result = ev.target?.result;
+      if (typeof result === "string") {
+        setCroppingImg(result);
+      }
+    };
     reader.readAsDataURL(file);
   }
 
@@ -40,7 +55,7 @@ export function DashboardPage({ user, projects, onUpload, onUpdateUser, onSignOu
   return (
     <div className="min-h-screen max-w-[1000px] mx-auto px-[clamp(16px,4vw,32px)] pt-[clamp(32px,5vw,48px)] pb-16 animate-[fadeUp_.6s_ease_both]">
       {croppingImg && (
-        <ImageCropper src={croppingImg} onCrop={d => { setTempAvatar(d); setCroppingImg(null); }} onCancel={() => setCroppingImg(null)} circular />
+        <ImageCropper key={croppingImg} src={croppingImg} onCrop={d => { setTempAvatar(d); setCroppingImg(null); }} onCancel={() => setCroppingImg(null)} circular />
       )}
 
       {/* Profile header */}

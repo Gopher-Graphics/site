@@ -1,17 +1,24 @@
-import React, { useState, useRef } from "react";
+import { useState, useRef } from "react";
 
-export function ImageCropper({ src, onCrop, onCancel, circular = false }) {
+interface ImageCropperProps {
+  src: string;
+  onCrop: (d: string) => void;
+  onCancel: () => void;
+  circular?: boolean;
+}
+
+export function ImageCropper({ src, onCrop, onCancel, circular = false }: ImageCropperProps) {
   const [zoom, setZoom]             = useState(1);
   const [pos, setPos]               = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const [lastPos, setLastPos]       = useState({ x: 0, y: 0 });
   const [ratio, setRatio]           = useState(1);
-  const imgRef = useRef(null);
+  const imgRef = useRef<HTMLImageElement>(null);
 
-  React.useEffect(() => { setZoom(1); setPos({ x: 0, y: 0 }); }, [src]);
 
-  const handleStart = (x, y) => { setIsDragging(true); setLastPos({ x, y }); };
-  const handleMove  = (x, y) => {
+
+  const handleStart = (x: number, y: number) => { setIsDragging(true); setLastPos({ x, y }); };
+  const handleMove  = (x: number, y: number) => {
     if (!isDragging) return;
     setPos(p => ({ x: p.x + (x - lastPos.x), y: p.y + (y - lastPos.y) }));
     setLastPos({ x, y });
@@ -21,12 +28,13 @@ export function ImageCropper({ src, onCrop, onCancel, circular = false }) {
   const performCrop = () => {
     const canvas = document.createElement("canvas");
     const ctx    = canvas.getContext("2d");
+    if (!ctx) return;
     const size   = 600;
     canvas.width = canvas.height = size;
     const img = imgRef.current;
     if (!img || !img.complete || img.naturalWidth === 0) return;
     const r = img.naturalWidth / img.naturalHeight;
-    let w, h;
+    let w: number, h: number;
     if (r > 1) { h = size * zoom; w = h * r; } else { w = size * zoom; h = w / r; }
     ctx.fillStyle = "#000";
     ctx.fillRect(0, 0, size, size);
@@ -52,7 +60,10 @@ export function ImageCropper({ src, onCrop, onCancel, circular = false }) {
           onTouchMove={e  => handleMove(e.touches[0].clientX, e.touches[0].clientY)}
           onTouchEnd={handleEnd}>
           <img ref={imgRef} src={src} alt="Cropping"
-            onLoad={e => setRatio(e.target.naturalWidth / e.target.naturalHeight)}
+            onLoad={e => {
+              const target = e.target as HTMLImageElement;
+              setRatio(target.naturalWidth / target.naturalHeight);
+            }}
             className="absolute max-w-none max-h-none pointer-events-none select-none"
             style={{ width: ratio > 1 ? "auto" : "100%", height: ratio > 1 ? "100%" : "auto", top:"50%", left:"50%", transform:`translate(calc(-50% + ${pos.x}px), calc(-50% + ${pos.y}px)) scale(${zoom})` }} />
           <div className="absolute inset-0 pointer-events-none"

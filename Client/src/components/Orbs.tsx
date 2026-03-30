@@ -1,7 +1,19 @@
-import React from "react";
+
+
+interface Orb {
+  w: number;
+  h: number;
+  top: string;
+  left: string;
+  c1: string;
+  c2: string;
+  dur: string;
+  delay: string;
+  opacity: number;
+}
 
 export function Orbs() {
-  const orbs = [
+  const orbs: Orb[] = [
     { w:700, h:700, top:"-15%", left:"-12%", c1:"#7A0019", c2:"#aa0025", dur:"20s", delay:"0s",   opacity:0.4  },
     { w:550, h:550, top:"42%",  left:"60%",  c1:"#FFCC33", c2:"#bb8800", dur:"24s", delay:"-6s",  opacity:0.3  },
     { w:480, h:480, top:"60%",  left:"5%",   c1:"#8B0020", c2:"#FFCC33", dur:"28s", delay:"-10s", opacity:0.25 },

@@ -1,44 +1,56 @@
-import React, { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { ImageCropper } from "./ImageCropper";
 
 const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 const currentYear = new Date().getFullYear();
 const YEARS = Array.from({ length: 6 }, (_, i) => currentYear - i);
 
-export function UploadProjectModal({ onClose, onSubmit, existingTags }) {
+interface UploadProjectModalProps {
+  onClose: () => void;
+  onSubmit: (_project: any) => void;
+  existingTags: string[];
+}
+
+export function UploadProjectModal({ onClose, onSubmit, existingTags }: UploadProjectModalProps) {
   const [title, setTitle]             = useState("");
   const [desc, setDesc]               = useState("");
   const [longDesc, setLongDesc]       = useState("");
   const [link, setLink]               = useState("");
   const [month, setMonth]             = useState(MONTHS[new Date().getMonth()]);
   const [year, setYear]               = useState(currentYear);
-  const [selectedTags, setSelectedTags] = useState([]);
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [newTag, setNewTag]           = useState("");
-  const [previews, setPreviews]       = useState([]);
+  const [previews, setPreviews]       = useState<string[]>([]);
   const [error, setError]             = useState("");
   const [dragOver, setDragOver]       = useState(false);
-  const [croppingImg, setCroppingImg] = useState(null);
-  const [cropQueue, setCropQueue]     = useState([]);
-  const fileRef = useRef(null);
+  const [croppingImg, setCroppingImg] = useState<string | null>(null);
+  const [cropQueue, setCropQueue]     = useState<string[]>([]);
+  const fileRef = useRef<HTMLInputElement>(null);
 
-  function handleFiles(files) {
+  function handleFiles(files: FileList | File[]) {
     Array.from(files).filter(f => f.type.startsWith("image/")).forEach(file => {
       const reader = new FileReader();
-      reader.onload = e => setCropQueue(prev => [...prev, e.target.result]);
+      reader.onload = e => {
+        const result = e.target?.result;
+        if (typeof result === "string") {
+          setCropQueue(prev => [...prev, result]);
+        }
+      };
       reader.readAsDataURL(file);
     });
   }
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (!croppingImg && cropQueue.length > 0) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setCroppingImg(cropQueue[0]);
       setCropQueue(prev => prev.slice(1));
     }
   }, [cropQueue, croppingImg]);
 
-  function handleCropComplete(d) { setPreviews(prev => [...prev, d]); setCroppingImg(null); }
-  function removeImage(idx) { setPreviews(prev => prev.filter((_, i) => i !== idx)); }
-  function toggleTag(tag) { setSelectedTags(prev => prev.includes(tag) ? prev.filter(t => t !== tag) : [...prev, tag]); }
+  function handleCropComplete(d: string) { setPreviews(prev => [...prev, d]); setCroppingImg(null); }
+  function removeImage(idx: number) { setPreviews(prev => prev.filter((_, i) => i !== idx)); }
+  function toggleTag(tag: string) { setSelectedTags(prev => prev.includes(tag) ? prev.filter(t => t !== tag) : [...prev, tag]); }
   function addNewTag() { const t = newTag.trim(); if (t && !selectedTags.includes(t)) { setSelectedTags(prev => [...prev, t]); setNewTag(""); } }
 
   function handleSubmit() {
@@ -53,7 +65,7 @@ export function UploadProjectModal({ onClose, onSubmit, existingTags }) {
 
   return (
     <div className="modal-overlay" onClick={onClose}>
-      {croppingImg && <ImageCropper src={croppingImg} onCrop={handleCropComplete} onCancel={() => setCroppingImg(null)} />}
+      {croppingImg && <ImageCropper key={croppingImg} src={croppingImg} onCrop={handleCropComplete} onCancel={() => setCroppingImg(null)} />}
 
       <div className="glass w-[min(720px,94vw)] max-h-[92vh] overflow-y-auto animate-[modalIn_.25s_cubic-bezier(.34,1.46,.64,1)]"
         style={{ backgroundImage:"linear-gradient(168deg, rgba(255,255,255,.2) 0%, rgba(255,255,255,.06) 40%, rgba(122,0,25,.06) 100%)" }}
@@ -88,12 +100,12 @@ export function UploadProjectModal({ onClose, onSubmit, existingTags }) {
               style={{ border:`2px dashed ${dragOver ? "#FFCC33" : "rgba(255,255,255,.18)"}`, background: dragOver ? "rgba(255,204,51,.06)" : "rgba(255,255,255,.03)", boxShadow: dragOver ? "0 0 20px rgba(255,204,51,0.3)" : "none" }}
               onDragOver={e => { e.preventDefault(); setDragOver(true); }}
               onDragLeave={() => setDragOver(false)}
-              onDrop={e => { e.preventDefault(); setDragOver(false); handleFiles(e.dataTransfer.files); }}
+              onDrop={e => { e.preventDefault(); setDragOver(false); if (e.dataTransfer.files) handleFiles(e.dataTransfer.files); }}
               onClick={() => fileRef.current?.click()}>
               <div className="icon-badge mb-2 mx-auto">IMG</div>
               <p className="font-ui text-[14px] m-0" style={{ color:"rgba(255,225,195,.65)" }}>Drag &amp; drop images here or <span className="text-gold font-semibold">click to browse</span></p>
               <p className="font-ui text-[11px] mt-1 m-0" style={{ color:"rgba(255,210,170,.35)" }}>PNG, JPG, GIF up to 10MB each</p>
-              <input ref={fileRef} type="file" accept="image/*" multiple className="hidden" onChange={e => handleFiles(e.target.files)} />
+              <input ref={fileRef} type="file" accept="image/*" multiple className="hidden" onChange={e => { if (e.target.files) handleFiles(e.target.files); }} />
             </div>
             {previews.length > 0 && (
               <div className="flex gap-2.5 mt-3.5 flex-wrap">

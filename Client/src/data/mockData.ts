@@ -1,3 +1,4 @@
+import { User, Channel, Project, MessagesByChannel } from "../types";
 import avatar1 from "../assets/avatars/1.jpeg";
 import avatar2 from "../assets/avatars/2.jpeg";
 import avatar3 from "../assets/avatars/3.jpeg";
@@ -5,9 +6,8 @@ import avatar4 from "../assets/avatars/4.jpeg";
 import avatar5 from "../assets/avatars/5.jpeg";
 import avatar6 from "../assets/avatars/6.jpeg";
 import avatar7 from "../assets/avatars/7.jpeg";
-import avatar8 from "../assets/avatars/8.jpeg";
 
-export const FAKE_USERS = [
+export const FAKE_USERS: User[] = [
   { x500: "mchen", password: "password", name: "Mia Chen", role: "President", avatar: avatar1 },
   { x500: "jonask", password: "password", name: "Jonas K.", role: "Vice President", avatar: avatar2 },
   { x500: "priya", password: "password", name: "Priya S.", role: "Projects Lead", avatar: avatar3 },
@@ -17,7 +17,7 @@ export const FAKE_USERS = [
   { x500: "demo", password: "demo", name: "Demo User", role: "Member", avatar: avatar7 },
 ];
 
-export const CHANNELS = [
+export const CHANNELS: Channel[] = [
   { id: "general",    name: "general",         desc: "General club chat" },
   { id: "shaders",    name: "shaders",         desc: "GLSL tips and shader showcases" },
   { id: "opengl",     name: "opengl-vulkan",   desc: "Low-level graphics APIs" },
@@ -26,7 +26,7 @@ export const CHANNELS = [
   { id: "random",     name: "random",          desc: "Off-topic fun" },
 ];
 
-export const SEED_MESSAGES = {
+export const SEED_MESSAGES: MessagesByChannel = {
   general: [
     { id:1, author:"Mia Chen",  text:"Hey everyone! Reminder that this Thursday's meeting we're doing a live WebGL demo session. Bring your shaders!",         time:"Today 10:02 AM" },
     { id:2, author:"Jonas K.",  text:"Can't wait. I've been working on a Navier-Stokes sim I want to show off",                                            time:"Today 10:14 AM" },
@@ -60,7 +60,7 @@ export const SEED_MESSAGES = {
   ],
 };
 
-export const PROJECTS = [
+export const PROJECTS: Project[] = [
   { id:1, title:"Ray Tracer in C++", author:"Mia Chen", tags:["C++","Ray Tracing"], desc:"A full path-tracer with global illumination and material shaders.", date:"Mar 2026", longDesc:"This project implements a fully featured offline path tracer from scratch in C++17. It supports physically-based BRDFs including Lambertian diffuse, GGX microfacet specular, and dielectric transmission. The renderer uses Monte Carlo integration with importance sampling and a BVH acceleration structure for fast ray-triangle intersection. Final renders on a 1080p scene with 2048 samples-per-pixel take around 40 minutes on a modern CPU.", tech:["C++17","BVH Acceleration","Monte Carlo","BRDF","Multi-threading"], github:"github.com/miachen/raytracer", preview:["Global illumination with soft shadows","Caustics through glass spheres","Subsurface scattering on wax candles"] },
   { id:2, title:"WebGL Fluid Sim", author:"Jonas K.", tags:["WebGL","Simulation"], desc:"Real-time Navier-Stokes fluid dynamics running on the GPU.", date:"Feb 2026", longDesc:"A GPU-accelerated 2D fluid simulation running entirely in the browser using WebGL2 fragment shaders. The solver implements the stable fluids method with velocity advection, pressure projection via Jacobi iteration, and vorticity confinement.", tech:["WebGL2","GLSL","Navier-Stokes","Jacobi Solver","JavaScript"], github:"github.com/jonask/webgl-fluid", preview:["Real-time dye injection and mixing","Vortex shedding visualization","Pressure field heatmap overlay"] },
   { id:3, title:"Voxel Engine", author:"Priya S.", tags:["OpenGL","Voxel"], desc:"Minecraft-inspired voxel renderer with ambient occlusion.", date:"Jan 2026", longDesc:"A chunk-based voxel world renderer built with OpenGL 4.5 and written in Rust. Features greedy mesh generation, pre-computed ambient occlusion, frustum culling, and a custom texture atlas system.", tech:["OpenGL 4.5","Rust","Greedy Meshing","Ambient Occlusion","Perlin Noise"], github:"github.com/priyaS/voxel-rs", preview:["Chunk streaming with LOD","Underground cave networks","Dynamic day/night sky rendering"] },

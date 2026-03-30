@@ -1,10 +1,16 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 
+interface FeatureCard {
+  icon: string;
+  title: string;
+  desc: string;
+}
+
 export function HomePage() {
   const navigate = useNavigate();
 
-  const cards = [
+  const cards: FeatureCard[] = [
     { icon:"WS",  title:"Weekly Workshops",     desc:"Learn shaders, rendering algorithms, and graphics APIs together." },
     { icon:"GFX", title:"Project Showcases",     desc:"Present your work and get feedback from fellow Gophers." },
     { icon:"CUP", title:"Competitions",          desc:"Join demoscene competitions and game jams as a team." },

@@ -1,6 +1,13 @@
-import React, { useState } from "react";
+import { useState } from "react";
 
-export function ImageCarousel({ images, height = 160, borderRadius = "0", fit = "cover" }) {
+interface ImageCarouselProps {
+  images: string[];
+  height?: number | string;
+  borderRadius?: string;
+  fit?: "cover" | "contain";
+}
+
+export function ImageCarousel({ images, height = 160, borderRadius = "0", fit = "cover" }: ImageCarouselProps) {
   const [idx, setIdx] = useState(0);
 
   if (!images || images.length === 0) {
@@ -13,8 +20,8 @@ export function ImageCarousel({ images, height = 160, borderRadius = "0", fit = 
     );
   }
 
-  const prev = (e) => { e.stopPropagation(); setIdx(i => (i - 1 + images.length) % images.length); };
-  const next = (e) => { e.stopPropagation(); setIdx(i => (i + 1) % images.length); };
+  const prev = (e: React.MouseEvent) => { e.stopPropagation(); setIdx(i => (i - 1 + images.length) % images.length); };
+  const next = (e: React.MouseEvent) => { e.stopPropagation(); setIdx(i => (i + 1) % images.length); };
 
   const arrowBase = "absolute top-1/2 -translate-y-1/2 w-8 h-8 rounded-full flex items-center justify-center text-white text-base z-[2] transition-all duration-150";
   const arrowStyle = { background:"rgba(0,0,0,.45)", border:"1px solid rgba(255,255,255,.25)", backdropFilter:"blur(4px)" };

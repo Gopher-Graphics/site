@@ -1,7 +1,19 @@
-import React from "react";
+// ... nothing for now, I'll see if there are other imports ... 
+
+interface Member {
+  name: string;
+  role: string;
+}
+
+interface InfoCard {
+  icon: string;
+  title: string;
+  info: string;
+  sub: string;
+}
 
 export function AboutPage() {
-  const MEMBERS = [
+  const MEMBERS: Member[] = [
     { name:"Mia Chen",  role:"President"      },
     { name:"Jonas K.",  role:"Vice President" },
     { name:"Priya S.",  role:"Projects Lead"  },
@@ -10,7 +22,7 @@ export function AboutPage() {
     { name:"Dev M.",    role:"Member"         },
   ];
 
-  const infoCards = [
+  const infoCards: InfoCard[] = [
     { icon:"CAL", title:"Weekly Meetings", info:"Every Thursday, 6:00 PM", sub:"Keller Hall 3-125" },
     { icon:"MSG", title:"Discord",         info:"discord.gg/gopherGFX",    sub:"Always active — ask questions anytime" },
   ];

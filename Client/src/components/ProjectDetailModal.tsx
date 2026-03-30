@@ -1,7 +1,12 @@
-import React, { useState } from "react";
+import { Project } from "../types";
 import { ImageCarousel } from "./ImageCarousel";
 
-export function ProjectDetailModal({ project: p, onClose }) {
+interface ProjectDetailModalProps {
+  project: Project & { images?: string[] };
+  onClose: () => void;
+}
+
+export function ProjectDetailModal({ project: p, onClose }: ProjectDetailModalProps) {
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div className="glass w-[min(720px,94vw)] max-h-[92vh] overflow-y-auto animate-[modalIn_.25s_cubic-bezier(.34,1.46,.64,1)]"

@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import { useState, useRef, ChangeEvent } from "react";
 import { ImageCropper } from "./ImageCropper";
+import { User } from "../types";
 
 import avatar1 from "../assets/avatars/1.jpeg";
 import avatar2 from "../assets/avatars/2.jpeg";
@@ -12,7 +13,14 @@ import avatar8 from "../assets/avatars/8.jpeg";
 
 const DEFAULT_AVATARS = [avatar1, avatar2, avatar3, avatar4, avatar5, avatar6, avatar7, avatar8];
 
-export function LoginModal({ onClose, onLogin, onCreateAccount, users }) {
+interface LoginModalProps {
+  onClose: () => void;
+  onLogin: (_user: User) => void;
+  onCreateAccount: (_user: User) => void;
+  users: User[];
+}
+
+export function LoginModal({ onClose, onLogin, onCreateAccount, users }: LoginModalProps) {
   const [isCreate, setIsCreate]       = useState(false);
   const [x500, setX500]               = useState("");
   const [pass, setPass]               = useState("");
@@ -20,17 +28,23 @@ export function LoginModal({ onClose, onLogin, onCreateAccount, users }) {
   const [avatar, setAvatar]           = useState(avatar7);
   const [error, setError]             = useState("");
   const [shaking, setShaking]         = useState(false);
-  const [croppingImg, setCroppingImg] = useState(null);
-  const fileRef = React.useRef(null);
+  const [croppingImg, setCroppingImg] = useState<string | null>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
 
   function triggerShake() { setShaking(true); setTimeout(() => setShaking(false), 500); }
 
-  function handleFileSelect(e) {
-    const file = e.target.files[0];
+  function handleFileSelect(e: ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
     if (!file) return;
     if (!file.type.startsWith("image/")) { setError("Please select an image file"); return; }
     const reader = new FileReader();
-    reader.onload = ev => { setCroppingImg(ev.target.result); setError(""); };
+    reader.onload = ev => {
+      const result = ev.target?.result;
+      if (typeof result === "string") {
+        setCroppingImg(result);
+        setError("");
+      }
+    };
     reader.readAsDataURL(file);
   }
 
@@ -49,7 +63,7 @@ export function LoginModal({ onClose, onLogin, onCreateAccount, users }) {
   return (
     <div className="modal-overlay" onClick={onClose}>
       {croppingImg && (
-        <ImageCropper src={croppingImg} onCrop={d => { setAvatar(d); setCroppingImg(null); }} onCancel={() => setCroppingImg(null)} circular />
+        <ImageCropper key={croppingImg} src={croppingImg} onCrop={(d: string) => { setAvatar(d); setCroppingImg(null); }} onCancel={() => setCroppingImg(null)} circular />
       )}
       <div className="glass w-[min(400px,92vw)] px-[clamp(20px,5vw,32px)] py-9 relative"
         style={{ backgroundImage:"linear-gradient(168deg, rgba(255,255,255,.2) 0%, rgba(255,255,255,.08) 40%, rgba(122,0,25,.08) 100%)", animation: shaking ? "shake .4s ease" : "modalIn .22s cubic-bezier(.34,1.56,.64,1)" }}

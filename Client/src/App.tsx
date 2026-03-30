@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { Orbs } from "./components/Orbs";
 import { Nav } from "./components/Nav";
@@ -10,37 +10,41 @@ import { AboutPage } from "./pages/AboutPage";
 import { MessagesPage } from "./pages/MessagesPage";
 import { DashboardPage } from "./pages/DashboardPage";
 import { PROJECTS as INITIAL_PROJECTS, FAKE_USERS, CHANNELS, SEED_MESSAGES } from "./data/mockData";
+import { User, Project, Channel, MessagesByChannel, DirectMessages } from "./types";
 
 export default function App() {
   const [showLogin, setShowLogin] = useState(false);
   const [showUpload, setShowUpload] = useState(false);
-  const [user, setUser] = useState(null);
-  const [projects, setProjects] = useState(INITIAL_PROJECTS);
-  const [users, setUsers] = useState(FAKE_USERS);
-  const [channels, setChannels] = useState(CHANNELS);
-  const [messagesByChannel, setMessagesByChannel] = useState(SEED_MESSAGES);
-  const [directMessages, setDirectMessages] = useState({});
+  const [user, setUser] = useState<User | null>(null);
+  const [projects, setProjects] = useState<Project[]>(INITIAL_PROJECTS);
+  const [users, setUsers] = useState<User[]>(FAKE_USERS);
+  const [channels, setChannels] = useState<Channel[]>(CHANNELS);
+  const [messagesByChannel, setMessagesByChannel] = useState<MessagesByChannel>(SEED_MESSAGES);
+  const [directMessages, setDirectMessages] = useState<DirectMessages>({});
 
-  function handleLogin(u) { setUser(u); setShowLogin(false); }
+  function handleLogin(u: User) { setUser(u); setShowLogin(false); }
   function handleSignOut() { setUser(null); }
 
-  function handleCreateAccount(newU) {
+  function handleCreateAccount(newU: User) {
     setUsers(prev => [...prev, newU]);
     setUser(newU);
     setShowLogin(false);
   }
 
-  function handleUpdateUser(updatedData) {
-    setUser(prev => ({ ...prev, ...updatedData }));
-    setUsers(prev => prev.map(u => u.x500 === user.x500 ? { ...u, ...updatedData } : u));
+  function handleUpdateUser(updatedData: Partial<User>) {
+    if (!user) return;
+    const updated = { ...user, ...updatedData };
+    setUser(updated);
+    setUsers(prev => prev.map(u => u.x500 === user.x500 ? updated : u));
   }
 
-  function handleAddProject(project) {
-    const newProject = { ...project, author: user.name };
+  function handleAddProject(project: any) {
+    if (!user) return;
+    const newProject: Project = { ...project, author: user.name };
     setProjects(prev => [newProject, ...prev]);
   }
 
-  function handleDeleteProject(id) {
+  function handleDeleteProject(id: number) {
     setProjects(prev => prev.filter(p => p.id !== id));
   }
 
@@ -51,7 +55,7 @@ export default function App() {
       <div className="min-h-screen relative">
         <Orbs />
         <div className="relative z-10">
-          <Nav user={user} onSignIn={() => setShowLogin(true)} onSignOut={handleSignOut} />
+          <Nav user={user} onSignIn={() => setShowLogin(true)} />
 
           <Routes>
             <Route path="/"         element={<HomePage />} />

@@ -1,10 +1,15 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { ProjectDetailModal } from "../components/ProjectDetailModal";
 import { ImageCarousel } from "../components/ImageCarousel";
+import { Project } from "../types";
 
-export function ProjectsPage({ projects }) {
+interface ProjectsPageProps {
+  projects: Project[];
+}
+
+export function ProjectsPage({ projects }: ProjectsPageProps) {
   const [filter, setFilter] = useState("All");
-  const [selectedProject, setSelectedProject] = useState(null);
+  const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const allTags = ["All", ...Array.from(new Set(projects.flatMap(p => p.tags)))];
   const filtered = filter === "All" ? projects : projects.filter(p => p.tags.includes(filter));
 

@@ -1,7 +1,27 @@
-import React, { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo, Dispatch, SetStateAction, ReactNode } from "react";
+import { User, Channel, Message, MessagesByChannel } from "../types";
 
-export function MessagesPage({ user, users, channels, setChannels, messagesByChannel, setMessagesByChannel, directMessages, setDirectMessages }) {
-  const [activeTab, setActiveTab]           = useState({ type: "channel", id: "general" });
+interface MessagesPageProps {
+  user: User;
+  users: User[];
+  channels: Channel[];
+  setChannels: Dispatch<SetStateAction<Channel[]>>;
+  messagesByChannel: MessagesByChannel;
+  setMessagesByChannel: Dispatch<SetStateAction<MessagesByChannel>>;
+  directMessages: MessagesByChannel;
+  setDirectMessages: Dispatch<SetStateAction<MessagesByChannel>>;
+}
+
+type TabType = { type: "channel" | "dm"; id: string };
+
+interface Attachment {
+  type: "image";
+  data: string;
+  name: string;
+}
+
+export function MessagesPage({ user, users, channels, setChannels, messagesByChannel, setMessagesByChannel, directMessages, setDirectMessages }: MessagesPageProps) {
+  const [activeTab, setActiveTab]           = useState<TabType>({ type: "channel", id: "general" });
   const [draft, setDraft]                   = useState("");
   const [showSidebar, setShowSidebar]       = useState(false);
   const [isMobile, setIsMobile]             = useState(false);
@@ -11,13 +31,16 @@ export function MessagesPage({ user, users, channels, setChannels, messagesByCha
   const [joinedChannels, setJoinedChannels] = useState(["general"]);
   const [showBrowseChannels, setShowBrowseChannels] = useState(false);
   const [showNewDM, setShowNewDM]           = useState(false);
-  const fileRef  = useRef(null);
-  const [attachment, setAttachment]         = useState(null);
+  const fileRef  = useRef<HTMLInputElement>(null);
+  const [attachment, setAttachment]         = useState<Attachment | null>(null);
   const [uploading, setUploading]           = useState(false);
-  const [replyingTo, setReplyingTo]         = useState(null);
-  const bottomRef = useRef(null);
+  const [replyingTo, setReplyingTo]         = useState<Message | null>(null);
+  const bottomRef = useRef<HTMLDivElement>(null);
 
-  const messages         = activeTab.type === "channel" ? (messagesByChannel[activeTab.id] || []) : (directMessages[activeTab.id] || []);
+  const messages = useMemo(() => 
+    activeTab.type === "channel" ? (messagesByChannel[activeTab.id] || []) : (directMessages[activeTab.id] || []),
+    [activeTab, messagesByChannel, directMessages]
+  );
   const activeChannelObj = activeTab.type === "channel" ? channels.find(c => c.id === activeTab.id) : null;
   const activeDMUser     = activeTab.type === "dm"      ? users.find(u => u.x500 === activeTab.id) : null;
 
@@ -30,15 +53,21 @@ export function MessagesPage({ user, users, channels, setChannels, messagesByCha
 
   useEffect(() => { bottomRef.current?.scrollIntoView({ behavior:"smooth" }); }, [messages, activeTab]);
 
-  function handleFileSelect(e) {
-    const file = e.target.files[0];
+  function handleFileSelect(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
     if (!file) return;
     if (!file.type.startsWith("image/")) return;
     setUploading(true);
     const reader = new FileReader();
-    reader.onload = ev => { setAttachment({ type:"image", data:ev.target.result, name:file.name }); setUploading(false); };
+    reader.onload = ev => {
+      const result = ev.target?.result;
+      if (typeof result === "string") {
+        setAttachment({ type:"image", data:result, name:file.name });
+      }
+      setUploading(false);
+    };
     reader.readAsDataURL(file);
-    e.target.value = null;
+    e.target.value = "";
   }
 
   function sendMessage() {
@@ -62,26 +91,28 @@ export function MessagesPage({ user, users, channels, setChannels, messagesByCha
     setShowCreateChannel(false); setNewChannelName(""); setNewChannelDesc("");
   }
 
-  function joinChannel(id) {
+  function joinChannel(id: string) {
     if (!joinedChannels.includes(id)) {
       setJoinedChannels(prev => [...prev, id]);
-      const sysMsg = { id: Date.now(), type: "system_join", author: user.name, time: "Just now" };
+      // eslint-disable-next-line react-hooks/purity
+      const sysMsg: Message = { id: Date.now(), type: "system_join", author: user.name, time: "Just now" };
       setMessagesByChannel(prev => ({ ...prev, [id]: [...(prev[id] || []), sysMsg] }));
     }
     setActiveTab({ type:"channel", id }); setShowBrowseChannels(false); setShowSidebar(false);
   }
 
-  function leaveChannel(id) {
+  function leaveChannel(id: string) {
     const updated = joinedChannels.filter(c => c !== id);
     setJoinedChannels(updated);
-    const sysMsg = { id: Date.now(), type: "system_leave", author: user.name, time: "Just now" };
+    // eslint-disable-next-line react-hooks/purity
+    const sysMsg: Message = { id: Date.now(), type: "system_leave", author: user.name, time: "Just now" };
     setMessagesByChannel(prev => ({ ...prev, [id]: [...(prev[id] || []), sysMsg] }));
     if (activeTab.type === "channel" && activeTab.id === id) {
       setActiveTab({ type: "channel", id: updated.length > 0 ? updated[0] : "general" });
     }
   }
 
-  function startDM(targetUser) {
+  function startDM(targetUser: User) {
     if (!directMessages[targetUser.x500]) setDirectMessages(prev => ({ ...prev, [targetUser.x500]:[] }));
     setActiveTab({ type:"dm", id:targetUser.x500 }); setShowNewDM(false); setShowSidebar(false);
   }
@@ -153,7 +184,7 @@ export function MessagesPage({ user, users, channels, setChannels, messagesByCha
   );
 
   // Modal wrapper helper
-  const modalOverlay = (onClose, children) => (
+  const modalOverlay = (onClose: () => void, children: ReactNode) => (
     <div className="absolute inset-0 z-[100] flex items-center justify-center p-4" style={{ background:"rgba(0,0,0,.6)", backdropFilter:"blur(4px)" }} onClick={onClose}>
       <div className="glass w-full max-w-[400px] p-6" onClick={e => e.stopPropagation()}>
         {children}
@@ -200,15 +231,15 @@ export function MessagesPage({ user, users, channels, setChannels, messagesByCha
                 <div className="font-ui text-white font-bold" style={{ fontSize: isMobile ? 14 : 16 }}>{activeChannelObj?.name}</div>
                 {!isMobile && <div className="font-ui text-[12px] truncate" style={{ color:"rgba(255,215,175,.5)" }}>{activeChannelObj?.desc}</div>}
               </div>
-              {activeChannelObj?.id !== "general" && (
-                <button onClick={() => leaveChannel(activeChannelObj?.id)}
+              {activeChannelObj?.id !== "general" && activeChannelObj?.id && (
+                <button onClick={() => leaveChannel(activeChannelObj.id)}
                   className="btn-ghost px-2.5 py-1 text-[11px] ml-2">Leave</button>
               )}
             </>
           ) : (
             <>
               <div className="rounded-full overflow-hidden" style={{ width: isMobile?24:32, height: isMobile?24:32, border:"1px solid rgba(255,255,255,0.2)" }}>
-                <img src={activeDMUser?.avatar} alt={activeDMUser?.name} className="w-full h-full object-cover" />
+                <img src={activeDMUser?.avatar || ""} alt={activeDMUser?.name || "User"} className="w-full h-full object-cover" />
               </div>
               <div className="min-w-0">
                 <div className="font-ui text-white font-bold" style={{ fontSize: isMobile ? 14 : 16 }}>{activeDMUser?.name}</div>
@@ -254,7 +285,7 @@ export function MessagesPage({ user, users, channels, setChannels, messagesByCha
                 <div className="w-9 flex-shrink-0 flex justify-center">
                   {!prevSame && (
                     <div className="w-9 h-9 rounded-full overflow-hidden" style={{ border: isMe ? "1px solid rgba(255,204,51,.4)" : "1px solid rgba(255,255,255,.2)" }}>
-                      <img src={m.avatar || (isMe ? user.avatar : users.find(u => u.name===m.author)?.avatar)} alt={m.author} className="w-full h-full object-cover" />
+                      <img src={m.avatar || (isMe ? user.avatar : users.find(u => u.name===m.author)?.avatar) || ""} alt={m.author} className="w-full h-full object-cover" />
                     </div>
                   )}
                 </div>
