@@ -19,7 +19,7 @@ export default function App() {
   const [users, setUsers] = useState(FAKE_USERS);
   const [channels, setChannels] = useState(CHANNELS);
   const [messagesByChannel, setMessagesByChannel] = useState(SEED_MESSAGES);
-  const [directMessages, setDirectMessages] = useState({}); // { "otherUserX500": [messages...] }
+  const [directMessages, setDirectMessages] = useState({});
 
   function handleLogin(u) { setUser(u); setShowLogin(false); }
   function handleSignOut() { setUser(null); }
@@ -40,37 +40,45 @@ export default function App() {
     setProjects(prev => [newProject, ...prev]);
   }
 
-  // Collect all unique tags from existing projects
+  function handleDeleteProject(id) {
+    setProjects(prev => prev.filter(p => p.id !== id));
+  }
+
   const allTags = Array.from(new Set(projects.flatMap(p => p.tags)));
 
   return (
     <BrowserRouter>
-      <div style={{ minHeight:"100vh", position:"relative" }}>
+      <div className="min-h-screen relative">
         <Orbs />
-        <div style={{ position:"relative", zIndex:1 }}>
-          <Nav user={user} onSignIn={()=>setShowLogin(true)} onSignOut={handleSignOut} />
-          
+        <div className="relative z-10">
+          <Nav user={user} onSignIn={() => setShowLogin(true)} onSignOut={handleSignOut} />
+
           <Routes>
-            <Route path="/" element={<HomePage />} />
-            <Route path="/home" element={<Navigate to="/" replace />} />
+            <Route path="/"         element={<HomePage />} />
+            <Route path="/home"     element={<Navigate to="/" replace />} />
             <Route path="/projects" element={<ProjectsPage projects={projects} />} />
-            <Route path="/about" element={<AboutPage />} />
-            
-            <Route 
-              path="/messages" 
-              element={user ? <MessagesPage user={user} users={users} channels={channels} setChannels={setChannels} messagesByChannel={messagesByChannel} setMessagesByChannel={setMessagesByChannel} directMessages={directMessages} setDirectMessages={setDirectMessages} /> : <Navigate to="/" replace />} 
-            />
-            
-            <Route 
-              path="/dashboard" 
-              element={user ? <DashboardPage user={user} projects={projects} onUpload={()=>setShowUpload(true)} onUpdateUser={handleUpdateUser} onSignOut={handleSignOut} /> : <Navigate to="/" replace />} 
-            />
+            <Route path="/about"    element={<AboutPage />} />
+
+            <Route path="/messages" element={
+              user
+                ? <MessagesPage user={user} users={users} channels={channels} setChannels={setChannels}
+                    messagesByChannel={messagesByChannel} setMessagesByChannel={setMessagesByChannel}
+                    directMessages={directMessages} setDirectMessages={setDirectMessages} />
+                : <Navigate to="/" replace />
+            } />
+
+            <Route path="/dashboard" element={
+              user
+                ? <DashboardPage user={user} projects={projects} onUpload={() => setShowUpload(true)}
+                    onUpdateUser={handleUpdateUser} onSignOut={handleSignOut} onDeleteProject={handleDeleteProject} />
+                : <Navigate to="/" replace />
+            } />
 
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
 
-          {showLogin && <LoginModal onClose={()=>setShowLogin(false)} onLogin={handleLogin} onCreateAccount={handleCreateAccount} users={users} />}
-          {showUpload && <UploadProjectModal onClose={()=>setShowUpload(false)} onSubmit={handleAddProject} existingTags={allTags} />}
+          {showLogin  && <LoginModal onClose={() => setShowLogin(false)} onLogin={handleLogin} onCreateAccount={handleCreateAccount} users={users} />}
+          {showUpload && <UploadProjectModal onClose={() => setShowUpload(false)} onSubmit={handleAddProject} existingTags={allTags} />}
         </div>
       </div>
     </BrowserRouter>

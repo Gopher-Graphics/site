@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { G } from "../constants/theme";
 import { ImageCropper } from "./ImageCropper";
 
 import avatar1 from "../assets/avatars/1.jpeg";
@@ -14,45 +13,25 @@ import avatar8 from "../assets/avatars/8.jpeg";
 const DEFAULT_AVATARS = [avatar1, avatar2, avatar3, avatar4, avatar5, avatar6, avatar7, avatar8];
 
 export function LoginModal({ onClose, onLogin, onCreateAccount, users }) {
-  const [isCreate, setIsCreate] = useState(false);
-  const [x500, setX500] = useState("");
-  const [pass, setPass] = useState("");
-  const [name, setName] = useState("");
-  const [avatar, setAvatar] = useState(avatar7);
-  const [error, setError] = useState("");
-  const [shaking, setShaking] = useState(false);
+  const [isCreate, setIsCreate]       = useState(false);
+  const [x500, setX500]               = useState("");
+  const [pass, setPass]               = useState("");
+  const [name, setName]               = useState("");
+  const [avatar, setAvatar]           = useState(avatar7);
+  const [error, setError]             = useState("");
+  const [shaking, setShaking]         = useState(false);
   const [croppingImg, setCroppingImg] = useState(null);
   const fileRef = React.useRef(null);
 
-  const inputStyle = {
-    width:"100%", padding:"11px 14px",
-    background:"rgba(255,255,255,.12)", border:"1.5px solid rgba(255,255,255,.35)",
-    borderRadius:"10px", fontFamily:G.ff, fontSize:14, color:"#fff", outline:"none",
-    boxShadow:"inset 0 2px 8px rgba(60,0,10,.15)", boxSizing:"border-box",
-    transition:"border-color .2s ease, box-shadow .2s ease",
-  };
-
-  function triggerShake() {
-    setShaking(true);
-    setTimeout(() => setShaking(false), 500);
-  }
+  function triggerShake() { setShaking(true); setTimeout(() => setShaking(false), 500); }
 
   function handleFileSelect(e) {
     const file = e.target.files[0];
     if (!file) return;
     if (!file.type.startsWith("image/")) { setError("Please select an image file"); return; }
-    
     const reader = new FileReader();
-    reader.onload = (ev) => {
-      setCroppingImg(ev.target.result);
-      setError("");
-    };
+    reader.onload = ev => { setCroppingImg(ev.target.result); setError(""); };
     reader.readAsDataURL(file);
-  }
-
-  function handleCropComplete(croppedData) {
-    setAvatar(croppedData);
-    setCroppingImg(null);
   }
 
   function handleSubmit() {
@@ -68,108 +47,88 @@ export function LoginModal({ onClose, onLogin, onCreateAccount, users }) {
   }
 
   return (
-    <div style={{ position:"fixed", inset:0, zIndex:200, display:"flex", alignItems:"center", justifyContent:"center", background:"rgba(15,0,4,.6)", backdropFilter:"blur(8px)", WebkitBackdropFilter:"blur(8px)", padding:"16px" }} onClick={onClose}>
+    <div className="modal-overlay" onClick={onClose}>
       {croppingImg && (
-        <ImageCropper 
-          src={croppingImg} 
-          onCrop={handleCropComplete} 
-          onCancel={() => setCroppingImg(null)} 
-          circular={true}
-        />
+        <ImageCropper src={croppingImg} onCrop={d => { setAvatar(d); setCroppingImg(null); }} onCancel={() => setCroppingImg(null)} circular />
       )}
-      <div style={{
-        ...G.glass, width:"min(400px, 92vw)", padding:"36px clamp(20px,5vw,32px)", position:"relative",
-        animation: shaking ? "shake .4s ease" : "modalIn .22s cubic-bezier(.34,1.56,.64,1)",
-        backgroundImage:"linear-gradient(168deg, rgba(255,255,255,.2) 0%, rgba(255,255,255,.08) 40%, rgba(122,0,25,.08) 100%)",
-      }} onClick={e => e.stopPropagation()}>
+      <div className="glass w-[min(400px,92vw)] px-[clamp(20px,5vw,32px)] py-9 relative"
+        style={{ backgroundImage:"linear-gradient(168deg, rgba(255,255,255,.2) 0%, rgba(255,255,255,.08) 40%, rgba(122,0,25,.08) 100%)", animation: shaking ? "shake .4s ease" : "modalIn .22s cubic-bezier(.34,1.56,.64,1)" }}
+        onClick={e => e.stopPropagation()}>
         <div className="shine-bar" style={{ borderRadius:18 }} />
 
-        <div style={{ textAlign:"center", marginBottom:24, position:"relative" }}>
+        {/* Header */}
+        <div className="text-center mb-6 relative">
           {isCreate ? (
-            <div style={{ 
-              width:80, height:80, borderRadius:"50%", margin:"0 auto 12px",
-              border:`3px solid ${G.gold}`, boxShadow:G.glowGold, overflow:"hidden",
-              background:"rgba(122,0,25,.45)"
-            }}>
-              <img src={avatar} alt="Avatar Preview" style={{ width:"100%", height:"100%", objectFit:"cover" }} />
+            <div className="w-20 h-20 rounded-full mx-auto mb-3 overflow-hidden"
+              style={{ border:"3px solid #FFCC33", boxShadow:"0 0 20px rgba(255,204,51,0.3)", background:"rgba(122,0,25,.45)" }}>
+              <img src={avatar} alt="Avatar Preview" className="w-full h-full object-cover" />
             </div>
           ) : (
-            <div style={{ fontSize:40, marginBottom:8, filter:`drop-shadow(0 2px 12px rgba(255,204,51,.3))` }}>🦫</div>
+            <div className="text-[40px] mb-2" style={{ filter:"drop-shadow(0 2px 12px rgba(255,204,51,.3))" }}>🦫</div>
           )}
-          <h2 style={{ fontFamily:G.ff, color:"#fff", margin:0, fontSize:22, fontWeight:700, textShadow:"0 2px 16px rgba(255,204,51,.4)" }}>
+          <h2 className="font-ui text-white m-0 text-[22px] font-bold" style={{ textShadow:"0 2px 16px rgba(255,204,51,.4)" }}>
             {isCreate ? "Join Gopher Graphics" : "Member Login"}
           </h2>
-          <p style={{ color:"rgba(255,225,195,.6)", fontSize:13, marginTop:6, fontFamily:G.ff }}>
+          <p className="font-ui text-[13px] mt-1.5" style={{ color:"rgba(255,225,195,.6)" }}>
             {isCreate ? "Create your club account" : "University of Minnesota — x500"}
           </p>
         </div>
 
-        <div style={{ display:"flex", flexDirection:"column", gap:12, position:"relative" }}>
+        {/* Fields */}
+        <div className="flex flex-col gap-3 relative">
           {isCreate && (
-            <input placeholder="Your Full Name" value={name} onChange={e=>{setName(e.target.value);setError("")}} style={inputStyle}
-              onFocus={e=>{e.target.style.borderColor="rgba(255,204,51,.6)";e.target.style.boxShadow="inset 0 2px 8px rgba(60,0,10,.15), 0 0 12px rgba(255,204,51,.15)"}}
-              onBlur={e=>{e.target.style.borderColor="rgba(255,255,255,.35)";e.target.style.boxShadow="inset 0 2px 8px rgba(60,0,10,.15)"}}
-            />
+            <input className="input-glass" placeholder="Your Full Name" value={name}
+              onChange={e => { setName(e.target.value); setError(""); }} />
           )}
-          <input placeholder="x500 Username" value={x500} onChange={e=>{setX500(e.target.value);setError("")}} style={inputStyle}
-            onFocus={e=>{e.target.style.borderColor="rgba(255,204,51,.6)";e.target.style.boxShadow="inset 0 2px 8px rgba(60,0,10,.15), 0 0 12px rgba(255,204,51,.15)"}}
-            onBlur={e=>{e.target.style.borderColor="rgba(255,255,255,.35)";e.target.style.boxShadow="inset 0 2px 8px rgba(60,0,10,.15)"}}
-          />
-          <input placeholder="Password" type="password" value={pass} onChange={e=>{setPass(e.target.value);setError("")}} style={inputStyle}
-            onKeyDown={e=>e.key==="Enter"&&handleSubmit()}
-            onFocus={e=>{e.target.style.borderColor="rgba(255,204,51,.6)";e.target.style.boxShadow="inset 0 2px 8px rgba(60,0,10,.15), 0 0 12px rgba(255,204,51,.15)"}}
-            onBlur={e=>{e.target.style.borderColor="rgba(255,255,255,.35)";e.target.style.boxShadow="inset 0 2px 8px rgba(60,0,10,.15)"}}
-          />
+          <input className="input-glass" placeholder="x500 Username" value={x500}
+            onChange={e => { setX500(e.target.value); setError(""); }} />
+          <input className="input-glass" type="password" placeholder="Password" value={pass}
+            onChange={e => { setPass(e.target.value); setError(""); }}
+            onKeyDown={e => e.key === "Enter" && handleSubmit()} />
 
           {isCreate && (
-            <div style={{ marginTop:4 }}>
-              <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:8 }}>
-                <label style={{ display:"block", fontFamily:G.ff, color:G.gold, fontSize:11, fontWeight:600, textTransform:"uppercase", letterSpacing:".05em" }}>Choose an Avatar</label>
-                <button onClick={() => fileRef.current?.click()} style={{ background:"none", border:"none", color:G.gold, fontSize:11, fontFamily:G.ff, cursor:"pointer", textDecoration:"underline", opacity:.8 }}>Upload Custom</button>
-                <input type="file" ref={fileRef} style={{ display:"none" }} accept="image/*" onChange={handleFileSelect} />
+            <div className="mt-1">
+              <div className="flex justify-between items-center mb-2">
+                <label className="label-gold m-0">Choose an Avatar</label>
+                <button onClick={() => fileRef.current?.click()} className="text-gold text-[11px] font-ui underline opacity-80">Upload Custom</button>
+                <input type="file" ref={fileRef} className="hidden" accept="image/*" onChange={handleFileSelect} />
               </div>
-              <div style={{ display:"grid", gridTemplateColumns:"repeat(4, 1fr)", gap:8 }}>
+              <div className="grid grid-cols-4 gap-2">
                 {DEFAULT_AVATARS.map((av, idx) => (
-                  <div key={idx} onClick={()=>setAvatar(av)} style={{
-                    width:"100%", aspectRatio:"1/1", cursor:"pointer", borderRadius:10, overflow:"hidden",
-                    border: avatar===av ? `2.5px solid ${G.gold}` : "2.5px solid rgba(255,255,255,.1)",
-                    boxShadow: avatar===av ? G.glowGold : "none",
-                    transition:"all .15s ease",
-                    background:"rgba(0,0,0,.2)"
-                  }}>
-                    <img src={av} alt={`Avatar ${idx+1}`} style={{ width:"100%", height:"100%", objectFit:"cover" }} />
+                  <div key={idx} onClick={() => setAvatar(av)}
+                    className="aspect-square cursor-pointer rounded-[10px] overflow-hidden transition-all duration-150"
+                    style={{ border: avatar === av ? "2.5px solid #FFCC33" : "2.5px solid rgba(255,255,255,.1)", boxShadow: avatar === av ? "0 0 20px rgba(255,204,51,0.3)" : "none", background:"rgba(0,0,0,.2)" }}>
+                    <img src={av} alt={`Avatar ${idx+1}`} className="w-full h-full object-cover" />
                   </div>
                 ))}
               </div>
             </div>
           )}
 
-          {error && <p style={{ fontFamily:G.ff, color:"#ff8888", fontSize:12, margin:"4px 0", textAlign:"center", background:"rgba(255,0,0,.08)", padding:"6px 12px", borderRadius:6, border:"1px solid rgba(255,80,80,.15)" }}>{error}</p>}
+          {error && (
+            <p className="font-ui text-[#ff8888] text-[12px] my-1 text-center px-3 py-1.5 rounded-md" style={{ background:"rgba(255,0,0,.08)", border:"1px solid rgba(255,80,80,.15)" }}>{error}</p>
+          )}
 
-          <button onClick={handleSubmit} style={{
-            ...G.btn, padding:"12px", fontSize:15, color:"#3a0008", marginTop:8, width:"100%",
-          }}>
+          <button onClick={handleSubmit} className="btn-vista w-full py-3 text-[15px] text-[#3a0008] mt-2">
             {isCreate ? "Create Account" : "Sign In"}
           </button>
 
-          <div style={{ textAlign:"center", marginTop:8 }}>
-            <button onClick={()=>{setIsCreate(!isCreate);setError("")}} style={{ background:"none", border:"none", color:G.gold, fontSize:13, fontFamily:G.ff, cursor:"pointer", textDecoration:"underline", opacity:.8 }}>
+          <div className="text-center mt-2">
+            <button onClick={() => { setIsCreate(!isCreate); setError(""); }} className="text-gold text-[13px] font-ui underline opacity-80">
               {isCreate ? "Already have an account? Sign in" : "Need an account? Sign up"}
             </button>
           </div>
 
           {!isCreate && (
-            <p style={{ textAlign:"center", color:"rgba(255,215,175,.4)", fontSize:11, fontFamily:G.ff, margin:0 }}>
-              Hint: try username <strong style={{color:"rgba(255,225,155,.75)"}}>demo</strong> / password <strong style={{color:"rgba(255,225,155,.75)"}}>demo</strong>
+            <p className="text-center text-[11px] font-ui m-0" style={{ color:"rgba(255,215,175,.4)" }}>
+              Hint: try username <strong style={{ color:"rgba(255,225,155,.75)" }}>demo</strong> / password <strong style={{ color:"rgba(255,225,155,.75)" }}>demo</strong>
             </p>
           )}
         </div>
 
-        <button onClick={onClose} style={{ position:"absolute", top:14, right:16, background:"rgba(0,0,0,.2)", border:"1px solid rgba(255,255,255,.15)", color:"rgba(255,255,255,.6)", fontSize:18, cursor:"pointer", borderRadius:"50%", width:30, height:30, display:"flex", alignItems:"center", justifyContent:"center", lineHeight:1 }}>×</button>
-        <style>{`
-          @keyframes modalIn{from{transform:scale(.88) translateY(20px);opacity:0}to{transform:scale(1) translateY(0);opacity:1}}
-          @keyframes shake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-8px)}40%,80%{transform:translateX(8px)}}
-        `}</style>
+        <button onClick={onClose}
+          className="absolute top-3.5 right-4 w-[30px] h-[30px] rounded-full flex items-center justify-center text-lg leading-none"
+          style={{ background:"rgba(0,0,0,.2)", border:"1px solid rgba(255,255,255,.15)", color:"rgba(255,255,255,.6)" }}>×</button>
       </div>
     </div>
   );

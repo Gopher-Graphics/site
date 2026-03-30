@@ -1,1 +1,10 @@
 .DS_Store
+.editorconfig
+GopherGraphics.sublime-project
+GopherGraphics.sublime-workspace
+database_diagram.html
+node_modules
+database_diagram.html
+Client/package-lock.json
+Server/package-lock.json
+package-lock.json

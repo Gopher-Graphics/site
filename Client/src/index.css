@@ -1,72 +1,216 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-html {
-  scroll-behavior: smooth;
-}
+/* ============================================================
+   BASE OVERRIDES
+   ============================================================ */
+@layer base {
+  *, *::before, *::after { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
 
-body {
-  background-color: #0a0003;
-  color: #fff;
-  font-family: 'Segoe UI', 'Trebuchet MS', 'Inter', system-ui, sans-serif;
-  overflow-x: hidden;
-  min-height: 100vh;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-::selection {
-  background: rgba(122, 0, 25, 0.7);
-  color: #FFCC33;
-}
-
-button {
-  border: none;
-  background: none;
-  font-family: inherit;
-  cursor: pointer;
-}
-
-/* Global scrollbar */
-::-webkit-scrollbar {
-  width: 6px;
-}
-::-webkit-scrollbar-track {
-  background: rgba(20, 0, 5, 0.3);
-}
-::-webkit-scrollbar-thumb {
-  background: rgba(255, 204, 51, 0.25);
-  border-radius: 3px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 204, 51, 0.4);
-}
-
-/* Vista shine bar — apply as a child div with class "shine-bar" */
-.shine-bar {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 50%;
-  background: linear-gradient(180deg, rgba(255,255,255,0.22) 0%, rgba(255,255,255,0.06) 60%, transparent 100%);
-  pointer-events: none;
-  border-radius: inherit;
-}
-
-/* Responsive helpers */
-@media (max-width: 768px) {
   body {
+    @apply bg-[#0a0003] text-white font-ui overflow-x-hidden min-h-screen antialiased;
+  }
+
+  ::selection {
+    background: rgba(122, 0, 25, 0.7);
+    color: #FFCC33;
+  }
+
+  button { @apply cursor-pointer font-ui border-0 bg-transparent; transition: all 0.18s ease; }
+  a      { transition: all 0.18s ease; }
+
+  /* Custom scrollbar */
+  ::-webkit-scrollbar       { width: 6px; }
+  ::-webkit-scrollbar-track { background: rgba(20,0,5,0.3); }
+  ::-webkit-scrollbar-thumb { background: rgba(255,204,51,0.25); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: rgba(255,204,51,0.4); }
+
+  @media (max-width: 768px) { body { font-size: 14px; } }
+}
+
+/* ============================================================
+   COMPONENT CLASSES — Vista Aero Glass Design System
+   These effects cannot be replicated with pure Tailwind utilities.
+   Use: className="glass", className="glass-card", etc.
+   ============================================================ */
+@layer components {
+
+  /* ── Main glass panel (cards, modals, nav) ────────────────── */
+  .glass {
+    background: linear-gradient(168deg, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0.08) 40%, rgba(255,204,51,0.06) 100%);
+    backdrop-filter: blur(24px) saturate(1.9) brightness(1.05);
+    -webkit-backdrop-filter: blur(24px) saturate(1.9) brightness(1.05);
+    border: 1.5px solid rgba(255,255,255,0.5);
+    box-shadow:
+      0 8px 40px rgba(80,0,15,0.28),
+      0 1.5px 0 rgba(255,255,255,0.7) inset,
+      0 -1px 0 rgba(255,204,51,0.15) inset,
+      0 0 0 0.5px rgba(255,255,255,0.15);
+    border-radius: 18px;
+    @apply relative overflow-hidden;
+  }
+
+  /* ── Lighter glass for interactive cards ──────────────────── */
+  .glass-card {
+    background: linear-gradient(170deg, rgba(255,255,255,0.22) 0%, rgba(255,255,255,0.10) 50%, rgba(122,0,25,0.08) 100%);
+    backdrop-filter: blur(20px) saturate(1.8);
+    -webkit-backdrop-filter: blur(20px) saturate(1.8);
+    border: 1.5px solid rgba(255,255,255,0.45);
+    box-shadow:
+      0 6px 32px rgba(80,0,15,0.22),
+      0 1.5px 0 rgba(255,255,255,0.65) inset,
+      0 -1px 0 rgba(255,204,51,0.1) inset;
+    border-radius: 16px;
+    @apply relative overflow-hidden;
+  }
+
+  /* ── Dark glass for sidebars / overlays ───────────────────── */
+  .glass-dark {
+    background: linear-gradient(180deg, rgba(40,0,10,0.55) 0%, rgba(20,0,5,0.65) 100%);
+    backdrop-filter: blur(28px) saturate(1.6);
+    -webkit-backdrop-filter: blur(28px) saturate(1.6);
+    border: 1px solid rgba(255,255,255,0.18);
+    box-shadow:
+      0 8px 32px rgba(0,0,0,0.35),
+      0 1px 0 rgba(255,255,255,0.2) inset;
+    border-radius: 16px;
+  }
+
+  /* ── Vista reflective button ──────────────────────────────── */
+  .btn-vista {
+    background: linear-gradient(
+      180deg,
+      rgba(255,255,255,0.92) 0%,
+      rgba(255,240,200,0.78) 46%,
+      rgba(210,155,40,0.82)  50%,
+      rgba(255,235,160,0.68) 51%,
+      rgba(255,245,200,0.55) 100%
+    );
+    backdrop-filter: blur(8px);
+    border: 1.5px solid rgba(255,255,255,0.85);
+    box-shadow:
+      0 2px 12px rgba(122,0,25,0.2),
+      0 1px 0 rgba(255,255,255,0.95) inset,
+      0 -0.5px 0 rgba(200,160,60,0.4) inset;
+    border-radius: 22px;
+    @apply font-ui font-semibold tracking-wide cursor-pointer;
+    transition: all 0.18s ease;
+  }
+
+  .btn-vista:hover {
+    transform: translateY(-2px);
+    box-shadow:
+      0 2px 12px rgba(122,0,25,0.2),
+      0 1px 0 rgba(255,255,255,0.95) inset,
+      0 -0.5px 0 rgba(200,160,60,0.4) inset,
+      0 0 20px rgba(255,204,51,0.3), 0 0 60px rgba(255,204,51,0.1);
+  }
+
+  /* ── Ghost / outline button variant ──────────────────────── */
+  .btn-ghost {
+    background: rgba(255,255,255,0.08);
+    border: 1.5px solid rgba(255,255,255,0.22);
+    border-radius: 22px;
+    @apply text-white font-ui font-semibold tracking-wide cursor-pointer;
+    transition: all 0.18s ease;
+  }
+
+  .btn-ghost:hover { background: rgba(255,255,255,0.15); }
+
+  /* ── Gold glow ────────────────────────────────────────────── */
+  .glow-gold {
+    box-shadow: 0 0 20px rgba(255,204,51,0.3), 0 0 60px rgba(255,204,51,0.1);
+  }
+
+  /* ── Vista shine bar (top-half highlight on glass panels) ─── */
+  .shine-bar {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 50%;
+    background: linear-gradient(180deg, rgba(255,255,255,0.22) 0%, rgba(255,255,255,0.06) 60%, transparent 100%);
+    pointer-events: none;
+    border-radius: inherit;
+    z-index: 0;
+  }
+
+  /* ── Modal overlay backdrop ───────────────────────────────── */
+  .modal-overlay {
+    @apply fixed inset-0 z-[200] flex items-center justify-center p-4;
+    background: rgba(15,0,4,0.6);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+
+  /* ── Form input (glass-style) ─────────────────────────────── */
+  .input-glass {
+    @apply w-full text-white outline-none;
+    padding: 11px 14px;
+    background: rgba(255,255,255,0.1);
+    border: 1.5px solid rgba(255,255,255,0.25);
+    border-radius: 10px;
+    font-family: inherit;
     font-size: 14px;
+    box-shadow: inset 0 2px 6px rgba(60,0,10,0.1);
+    box-sizing: border-box;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .input-glass:focus {
+    border-color: rgba(255,204,51,0.6);
+    box-shadow: inset 0 2px 6px rgba(60,0,10,0.1), 0 0 12px rgba(255,204,51,0.12);
+  }
+
+  /* ── Field label ──────────────────────────────────────────── */
+  .label-gold {
+    @apply block text-gold font-semibold uppercase tracking-widest;
+    font-size: 11px;
+    margin-bottom: 6px;
+  }
+
+  /* ── Tag/badge pill ───────────────────────────────────────── */
+  .tag-pill {
+    background: rgba(122,0,25,0.25);
+    border: 1px solid rgba(255,204,51,0.25);
+    @apply rounded-full px-2.5 py-0.5 text-[11px];
+    color: rgba(255,225,150,0.9);
+  }
+
+  /* ── Icon badge (short text placeholder for future icons) ─── */
+  .icon-badge {
+    @apply inline-block text-[11px] font-bold tracking-widest;
+    color: rgba(255,204,51,0.7);
+    background: rgba(255,204,51,0.1);
+    border: 1px solid rgba(255,204,51,0.2);
+    border-radius: 6px;
+    padding: 3px 7px;
   }
 }
 
-/* Smooth transitions for interactive elements */
-a, button {
-  transition: all 0.18s ease;
+/* ============================================================
+   KEYFRAMES (used by Tailwind animation utilities + Orbs)
+   ============================================================ */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes modalIn {
+  from { opacity: 0; transform: scale(0.9) translateY(24px); }
+  to   { opacity: 1; transform: scale(1)   translateY(0); }
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20%, 60%  { transform: translateX(-8px); }
+  40%, 80%  { transform: translateX(8px); }
+}
+
+@keyframes orbFloat {
+  0%   { transform: translate(0, 0)      scale(1); }
+  50%  { transform: translate(25px, 18px) scale(1.06); }
+  100% { transform: translate(45px, 35px) scale(1.14); }
 }
