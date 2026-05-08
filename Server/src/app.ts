@@ -62,7 +62,7 @@ if (process.env.NODE_ENV === "production") {
     app.use(express.static(publicPath));
     
     // fallback for react router
-    app.get("(.*)", (req: Request, res: Response) => {
+    app.get("/*any", (req: Request, res: Response) => {
         if (!req.path.startsWith("/api")) {
             res.sendFile(path.join(publicPath, "index.html"));
         } else {
