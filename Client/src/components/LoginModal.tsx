@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { login, signup } from "../api/auth";
 import { useAuth } from "../contexts/AuthContext";
@@ -11,6 +11,13 @@ interface LoginModalProps {
 
 export function LoginModal({ onClose }: LoginModalProps) {
   const { refreshUser } = useAuth();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+    return () => setMounted(false);
+  }, []);
+
   const [isCreate, setIsCreate]       = useState(false);
   const [usernameRaw, setUsernameRaw] = useState("");
   const [pass, setPass]               = useState("");
@@ -19,6 +26,8 @@ export function LoginModal({ onClose }: LoginModalProps) {
   const [error, setError]             = useState("");
   const [shaking, setShaking]         = useState(false);
   const [isLoading, setIsLoading]     = useState(false);
+
+  if (!mounted) return null;
 
   function triggerShake() { setShaking(true); setTimeout(() => setShaking(false), 500); }
 

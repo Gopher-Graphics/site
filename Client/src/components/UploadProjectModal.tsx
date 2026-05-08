@@ -16,6 +16,13 @@ interface UploadProjectModalProps {
 
 export function UploadProjectModal({ onClose, existingTags }: UploadProjectModalProps) {
   const queryClient = useQueryClient();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+    return () => setMounted(false);
+  }, []);
+
   const [title, setTitle]             = useState("");
   const [desc, setDesc]               = useState("");
   const [longDesc, setLongDesc]       = useState("");
@@ -31,6 +38,8 @@ export function UploadProjectModal({ onClose, existingTags }: UploadProjectModal
   const [cropQueue, setCropQueue]     = useState<string[]>([]);
   const [showAllTags, setShowAllTags] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
+
+  if (!mounted) return null;
 
   const createMutation = useMutation({
     mutationFn: createProject,
