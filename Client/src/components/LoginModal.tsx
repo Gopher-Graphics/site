@@ -1,8 +1,8 @@
 import { useState } from "react";
+import { createPortal } from "react-dom";
 import { login, signup } from "../api/auth";
 import { useAuth } from "../contexts/AuthContext";
 import { DEFAULT_AVATARS, defaultSignupAvatar } from "../constants/defaultAvatars";
-
 import logo from "../assets/logo.png";
 
 interface LoginModalProps {
@@ -47,7 +47,7 @@ export function LoginModal({ onClose }: LoginModalProps) {
     }
   }
 
-  return (
+  return createPortal(
     <div className="modal-overlay" onClick={onClose}>
       <div className="glass w-[min(400px,92vw)] px-[clamp(20px,5vw,32px)] py-9 relative"
         style={{ backgroundImage:"linear-gradient(168deg, rgba(255,255,255,.2) 0%, rgba(255,255,255,.08) 40%, rgba(122,0,25,.08) 100%)", animation: shaking ? "shake .4s ease" : "modalIn .22s cubic-bezier(.34,1.56,.64,1)" }}
@@ -121,6 +121,7 @@ export function LoginModal({ onClose }: LoginModalProps) {
           className="absolute top-3.5 right-4 w-[30px] h-[30px] rounded-full flex items-center justify-center text-lg leading-none"
           style={{ background:"rgba(0,0,0,.2)", border:"1px solid rgba(255,255,255,.15)", color:"rgba(255,255,255,.6)" }}>×</button>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

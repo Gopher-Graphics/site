@@ -47,7 +47,7 @@
   html { scroll-behavior: smooth; }
 
   body {
-    @apply bg-[#0a0003] text-white font-ui overflow-x-hidden min-h-screen antialiased;
+    @apply bg-[#0a0003] text-white font-ui min-h-screen antialiased;
   }
 
   ::selection {

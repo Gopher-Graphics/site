@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { createProject } from "../api/projects";
 import { AssetIcon } from "./AssetIcon";
@@ -88,7 +89,7 @@ export function UploadProjectModal({ onClose, existingTags }: UploadProjectModal
   const selectCls = "input-glass appearance-none pr-8 cursor-pointer";
   const isPending = createMutation.isPending;
 
-  return (
+  return createPortal(
     <div className="modal-overlay" onClick={onClose}>
       {croppingImg && <ImageCropper key={croppingImg} src={croppingImg} onCrop={handleCropComplete} onCancel={() => setCroppingImg(null)} />}
 
@@ -228,6 +229,7 @@ export function UploadProjectModal({ onClose, existingTags }: UploadProjectModal
           className="absolute top-3.5 right-4 w-8 h-8 rounded-full flex items-center justify-center text-lg"
           style={{ background:"rgba(0,0,0,.25)", border:"1px solid rgba(255,255,255,.15)", color:"rgba(255,255,255,.6)" }}>×</button>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
