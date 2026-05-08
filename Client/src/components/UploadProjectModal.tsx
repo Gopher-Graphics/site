@@ -50,7 +50,8 @@ export function UploadProjectModal({ onClose, existingTags }: UploadProjectModal
     }
   });
 
-  if (!mounted) return null;
+  const selectCls = "input-glass appearance-none pr-8 cursor-pointer";
+  const isPending = createMutation.isPending;
 
   function handleFiles(files: FileList | File[]) {
     Array.from(files).filter(f => f.type.startsWith("image/")).forEach(file => {
@@ -95,8 +96,7 @@ export function UploadProjectModal({ onClose, existingTags }: UploadProjectModal
     });
   }
 
-  const selectCls = "input-glass appearance-none pr-8 cursor-pointer";
-  const isPending = createMutation.isPending;
+  if (!mounted) return null;
 
   return createPortal(
     <div className="modal-overlay" onClick={onClose}>
