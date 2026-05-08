@@ -145,12 +145,12 @@ export function UploadProjectModal({ onClose, existingTags }: UploadProjectModal
             {previews.length > 0 && (
               <div className="flex gap-2.5 mt-3.5 flex-wrap">
                 {previews.map((src, i) => (
-                  <div key={i} className="relative rounded-lg overflow-hidden" style={{ width:110, height:80, border:"1.5px solid rgba(255,204,51,.4)", boxShadow:"0 4px 12px rgba(0,0,0,0.2)" }}>
+                  <div key={i} className="relative rounded-lg overflow-hidden aspect-video" style={{ width:160, border:"1.5px solid rgba(255,204,51,.4)", boxShadow:"0 4px 12px rgba(0,0,0,0.2)" }}>
                     <img src={src} alt={`Preview ${i+1}`} className="w-full h-full object-cover" />
                     <button onClick={e => { e.stopPropagation(); removeImage(i); }}
-                      className="absolute top-0.5 right-0.5 w-5 h-5 rounded-full flex items-center justify-center text-white text-xs"
-                      style={{ background:"rgba(180,0,0,.85)" }}>×</button>
-                    <div className="absolute bottom-0 inset-x-0 text-center text-white text-[9px] py-0.5 font-ui" style={{ background:"rgba(0,0,0,.45)" }}>IMAGE {i+1}</div>
+                      className="absolute top-1 right-1 w-6 h-6 rounded-full flex items-center justify-center text-white text-xs"
+                      style={{ background:"rgba(180,0,0,.85)", border:"1px solid rgba(255,255,255,0.2)" }}>×</button>
+                    <div className="absolute bottom-0 inset-x-0 text-center text-white text-[9px] py-1 font-ui" style={{ background:"rgba(0,0,0,.55)", backdropFilter:"blur(4px)" }}>IMAGE {i+1}</div>
                   </div>
                 ))}
               </div>

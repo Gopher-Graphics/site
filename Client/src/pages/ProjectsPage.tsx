@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { ProjectDetailModal } from "../components/ProjectDetailModal";
 import { Project } from "../types";
 import { getProjects } from "../api/projects";
+import { getImageUrl } from "../api/http";
 
 export function ProjectsPage() {
   const [filter, setFilter] = useState("All");
@@ -24,8 +25,6 @@ export function ProjectsPage() {
   const { projects, tags } = data;
   const allTags = ["All", ...tags.map((t) => t.name)];
   
-  // parse tags from postgres json format
-
   const parsedProjects = projects.map((p: any) => ({
     ...p,
     tags: Array.isArray(p.tags) ? p.tags.map((t: any) => t.name || t) : []
@@ -33,7 +32,6 @@ export function ProjectsPage() {
 
   const filtered = filter === "All" ? parsedProjects : parsedProjects.filter((p: any) => p.tags.includes(filter));
 
-  // sort by date descending
   const sortedProjects = [...filtered].sort((a: any, b: any) => {
     const parseDate = (dateLabel: string) => {
       if (!dateLabel) return new Date(0);
@@ -57,7 +55,6 @@ export function ProjectsPage() {
         <div className="w-[60px] h-[3px] mb-2.5 rounded-sm" style={{ background:"linear-gradient(90deg,#FFCC33,transparent)" }} />
         <p className="font-ui mb-7 text-[15px]" style={{ color:"rgba(255,225,195,.6)" }}>Work created by Gopher Graphics members</p>
 
-        {/* Tag filters */}
         <div className="flex gap-2 flex-wrap mb-9">
           {allTags.map(t => {
             const active = filter === t;
@@ -70,7 +67,6 @@ export function ProjectsPage() {
           })}
         </div>
 
-        {/* Project grid */}
         {sortedProjects.length === 0 ? (
           <div className="text-center py-20 text-[rgba(255,225,190,.6)] font-ui">No projects found.</div>
         ) : (
@@ -83,13 +79,12 @@ export function ProjectsPage() {
                 onMouseOut ={e => { e.currentTarget.style.transform=""; e.currentTarget.style.boxShadow=""; }}>
                 <div className="shine-bar" style={{ zIndex:2 }} />
 
-                {/* Image area */}
                 {p.thumbnail ? (
-                  <div className="relative overflow-hidden h-[150px]" style={{ background:"#0a0004", borderBottom:"1px solid rgba(255,204,51,.18)" }}>
-                    <img src={p.thumbnail.startsWith("http") ? p.thumbnail : import.meta.env.VITE_API_BASE_URL?.replace("/api", "") + p.thumbnail} alt={p.title} className="w-full h-full object-cover" />
+                  <div className="relative overflow-hidden aspect-video" style={{ background:"#0a0004", borderBottom:"1px solid rgba(255,204,51,.18)" }}>
+                    <img src={getImageUrl(p.thumbnail)} alt={p.title} className="w-full h-full object-cover" />
                   </div>
                 ) : (
-                  <div className="h-[130px] flex items-center justify-center relative overflow-hidden" style={{ background:"linear-gradient(135deg,rgba(122,0,25,.55),rgba(180,100,0,.3))", borderBottom:"1px solid rgba(255,204,51,.15)" }}>
+                  <div className="aspect-video flex items-center justify-center relative overflow-hidden" style={{ background:"linear-gradient(135deg,rgba(122,0,25,.55),rgba(180,100,0,.3))", borderBottom:"1px solid rgba(255,204,51,.15)" }}>
                     <div className="absolute inset-0" style={{ background:"radial-gradient(circle at 30% 40%,rgba(255,204,51,.08),transparent 60%)" }} />
                     <span className="font-ui font-bold text-2xl" style={{ color:"rgba(255,204,51,.4)" }}>{p.title.slice(0,2).toUpperCase()}</span>
                   </div>

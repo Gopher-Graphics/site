@@ -29,9 +29,11 @@ export function ProjectDetailModal({ projectId, onClose }: ProjectDetailModalPro
           <>
             {/* Image area */}
             {p.images && p.images.length > 0 ? (
-              <ImageCarousel images={p.images.map(i => getImageUrl(i.image_url))} height={400} borderRadius="18px 18px 0 0" fit="contain" />
+              <div className="aspect-video w-full relative overflow-hidden flex-shrink-0" style={{ borderRadius:"18px 18px 0 0", borderBottom:"1px solid rgba(255,204,51,.18)" }}>
+                <ImageCarousel images={p.images.map(i => getImageUrl(i.image_url))} height="100%" borderRadius="0" fit="cover" />
+              </div>
             ) : (
-              <div className="h-40 flex items-center justify-center relative overflow-hidden flex-shrink-0"
+              <div className="aspect-video w-full flex items-center justify-center relative overflow-hidden flex-shrink-0"
                 style={{ background:"linear-gradient(135deg,rgba(122,0,25,.65),rgba(180,100,0,.35))", borderRadius:"18px 18px 0 0", borderBottom:"1px solid rgba(255,204,51,.18)" }}>
                 <div className="absolute inset-0" style={{ background:"radial-gradient(circle at 30% 50%,rgba(255,204,51,.1),transparent 65%)" }} />
                 <div className="absolute top-0 left-0 right-0 h-1/2" style={{ background:"linear-gradient(180deg,rgba(255,255,255,.12),transparent)", borderRadius:"18px 18px 0 0" }} />
