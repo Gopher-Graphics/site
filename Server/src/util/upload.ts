@@ -37,7 +37,11 @@ export async function uploadImage(base64Data: string, folder = "uploads"): Promi
 }
 
 // local filesystem fallback (dev / test)
-async function saveLocally(base64Payload: string, folder: string, filename: string): Promise<UploadResult> {
+async function saveLocally(
+    base64Payload: string,
+    folder: string,
+    filename: string,
+): Promise<UploadResult> {
     const dir = path.join(process.cwd(), "uploads", folder);
     fs.mkdirSync(dir, { recursive: true });
     const filePath = path.join(dir, filename);
@@ -53,8 +57,7 @@ async function uploadToGCS(
     filename: string,
     contentType: string,
 ): Promise<UploadResult> {
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const { Storage } = require("@google-cloud/storage") as typeof import("@google-cloud/storage");
+    const { Storage } = require("@google-cloud/storage");
 
     const bucketName = process.env.GCS_BUCKET!;
     const key = `${folder}/${filename}`;
@@ -69,7 +72,7 @@ async function uploadToGCS(
     });
 
     // Make the file public if the bucket permissions aren't already set to allUsers
-    // await file.makePublic(); 
+    // await file.makePublic();
 
     const url = `https://storage.googleapis.com/${bucketName}/${key}`;
     return { url, key };
