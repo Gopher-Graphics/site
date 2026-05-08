@@ -2,6 +2,7 @@ import { Router, Request, Response } from "express";
 import pool from "../db";
 import { requireAuth } from "../middleware/auth";
 import { ok, created, fail } from "../util/response";
+import { uploadImage } from "../util/upload";
 
 const router = Router();
 
@@ -84,11 +85,23 @@ router.post("/", requireAuth, async (req: Request, res: Response) => {
         const receiverCheck = await pool.query("SELECT id FROM users WHERE id = $1", [receiver_id]);
         if (receiverCheck.rows.length === 0) { fail(res, 404, "Recipient not found"); return; }
 
+        let final_image_url: string | null = null;
+        if (image_data) {
+            try {
+                const uploadResult = await uploadImage(image_data, "messages");
+                final_image_url = uploadResult.url;
+            } catch (err) {
+                console.error("DM Image upload failed:", err);
+                fail(res, 400, "Invalid image data");
+                return;
+            }
+        }
+
         const result = await pool.query(
             `INSERT INTO direct_messages (sender_id, receiver_id, text, image_data, parent_id)
              VALUES ($1, $2, $3, $4, $5)
              RETURNING id, sender_id, receiver_id, text, image_data, parent_id, created_at`,
-            [req.user!.id, receiver_id, text ?? null, image_data ?? null, parent_id ?? null],
+            [req.user!.id, receiver_id, text ?? null, final_image_url, parent_id ?? null],
         );
         created(res, result.rows[0]);
     } catch (err) {

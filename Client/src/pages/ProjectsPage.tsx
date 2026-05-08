@@ -22,13 +22,16 @@ export function ProjectsPage() {
     return <div className="min-h-screen text-center pt-20 text-red-400 font-ui">Failed to load projects.</div>;
   }
 
-  const { projects, tags } = data;
-  const allTags = ["All", ...tags.map((t) => t.name)];
+  const { projects } = data;
   
   const parsedProjects = projects.map((p: any) => ({
     ...p,
     tags: Array.isArray(p.tags) ? p.tags.map((t: any) => t.name || t) : []
   }));
+
+  // Derive unique tags from the projects list
+  const usedTags = Array.from(new Set(parsedProjects.flatMap(p => p.tags))).sort();
+  const allTags = ["All", ...usedTags];
 
   const filtered = filter === "All" ? parsedProjects : parsedProjects.filter((p: any) => p.tags.includes(filter));
 

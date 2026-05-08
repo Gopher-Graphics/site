@@ -59,25 +59,27 @@ export function ProjectDetailModal({ projectId, onClose }: ProjectDetailModalPro
               <div className="h-px mb-[22px]" style={{ background:"linear-gradient(90deg,rgba(255,204,51,.35),transparent)" }} />
               <p className="font-ui text-[14.5px] leading-[1.75] mb-[26px]" style={{ color:"rgba(255,235,215,.84)" }}>{p.long_description || p.description}</p>
 
-              {((p.tech && p.tech.length > 0) || (p.tags && p.tags.length > 0)) && (
-                <div className="mb-[26px]">
-                  <h4 className="font-ui text-gold m-0 mb-3 text-[13px] uppercase tracking-[.08em] opacity-85">Tech Stack</h4>
-                  <div className="flex gap-2 flex-wrap">
-                    {p.tags && p.tags.map(t => (
-                      <span key={t.id || (t as any).name} className="px-3.5 py-1.5 rounded-lg text-[13px] font-ui"
-                        style={{ background:"rgba(255,255,255,.08)", border:"1px solid rgba(255,255,255,.2)", color:"rgba(255,240,220,.88)", backdropFilter:"blur(6px)", WebkitBackdropFilter:"blur(6px)" }}>
-                        {(t as any).name || t}
-                      </span>
-                    ))}
-                    {p.tech && p.tech.map(t => (
-                      <span key={t.id} className="px-3.5 py-1.5 rounded-lg text-[13px] font-ui"
-                        style={{ background:"rgba(255,255,255,.08)", border:"1px solid rgba(255,255,255,.2)", color:"rgba(255,240,220,.88)", backdropFilter:"blur(6px)", WebkitBackdropFilter:"blur(6px)" }}>
-                        {t.name}
-                      </span>
-                    ))}
+              {((p.tech && p.tech.length > 0) || (p.tags && p.tags.length > 0)) && (() => {
+                // Merge and deduplicate by name
+                const allTechNames = new Set<string>();
+                if (p.tags) p.tags.forEach(t => allTechNames.add(t.name || (t as any)));
+                if (p.tech) p.tech.forEach(t => allTechNames.add(t.name));
+                const uniqueTech = Array.from(allTechNames).sort();
+
+                return (
+                  <div className="mb-[26px]">
+                    <h4 className="font-ui text-gold m-0 mb-3 text-[13px] uppercase tracking-[.08em] opacity-85">Tech Stack</h4>
+                    <div className="flex gap-2 flex-wrap">
+                      {uniqueTech.map(name => (
+                        <span key={name} className="px-3.5 py-1.5 rounded-lg text-[13px] font-ui"
+                          style={{ background:"rgba(255,255,255,.08)", border:"1px solid rgba(255,255,255,.2)", color:"rgba(255,240,220,.88)", backdropFilter:"blur(6px)", WebkitBackdropFilter:"blur(6px)" }}>
+                          {name}
+                        </span>
+                      ))}
+                    </div>
                   </div>
-                </div>
-              )}
+                );
+              })()}
 
               {p.highlights && p.highlights.length > 0 && (
                 <div className="mb-7">

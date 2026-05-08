@@ -2,6 +2,7 @@ import { Router, Request, Response } from "express";
 import pool from "../db";
 import { requireAuth } from "../middleware/auth";
 import { ok, created, fail } from "../util/response";
+import { uploadImage } from "../util/upload";
 
 const router = Router();
 
@@ -180,11 +181,23 @@ router.post("/:slug/messages", requireAuth, async (req: Request, res: Response) 
         );
         if (membership.rows.length === 0) { fail(res, 403, "Join channel to post messages"); return; }
 
+        let final_image_url: string | null = null;
+        if (image_data) {
+            try {
+                const uploadResult = await uploadImage(image_data, "messages");
+                final_image_url = uploadResult.url;
+            } catch (err) {
+                console.error("Channel Image upload failed:", err);
+                fail(res, 400, "Invalid image data");
+                return;
+            }
+        }
+
         const result = await pool.query(
             `INSERT INTO channel_messages (channel_id, author_id, message_type, text, image_data, parent_id)
              VALUES ($1, $2, 'user', $3, $4, $5)
              RETURNING id, message_type, text, image_data, parent_id, created_at`,
-            [channelId, req.user!.id, text ?? null, image_data ?? null, parent_id ?? null],
+            [channelId, req.user!.id, text ?? null, final_image_url, parent_id ?? null],
         );
         created(res, result.rows[0]);
     } catch (err) {

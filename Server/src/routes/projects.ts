@@ -155,15 +155,29 @@ router.post("/", requireAuth, async (req: Request, res: Response) => {
         );
         const project = projectResult.rows[0];
 
-        // Tags: upsert, then link
-        for (const tagName of tags) {
-            const tagResult = await client.query(
-                `INSERT INTO tags (name) VALUES ($1)
-                 ON CONFLICT (name) DO UPDATE SET name = EXCLUDED.name
-                 RETURNING id`,
-                [tagName.trim()],
+        // Tags: check case-insensitively, use existing or create new
+        for (let tagName of tags) {
+            tagName = tagName.trim();
+            if (!tagName) continue;
+
+            // Look for existing tag case-insensitively
+            const existingTag = await client.query(
+                "SELECT id FROM tags WHERE LOWER(name) = LOWER($1)",
+                [tagName]
             );
-            const tagId = tagResult.rows[0].id;
+
+            let tagId;
+            if (existingTag.rows.length > 0) {
+                tagId = existingTag.rows[0].id;
+            } else {
+                // Create new tag with user's casing
+                const newTagResult = await client.query(
+                    "INSERT INTO tags (name) VALUES ($1) RETURNING id",
+                    [tagName]
+                );
+                tagId = newTagResult.rows[0].id;
+            }
+
             await client.query(
                 "INSERT INTO project_tags (project_id, tag_id) VALUES ($1, $2) ON CONFLICT DO NOTHING",
                 [project.id, tagId],

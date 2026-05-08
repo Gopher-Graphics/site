@@ -11,12 +11,11 @@ export interface UploadResult {
 /**
  * Upload an image from a base64 data-URI string.
  *
- * In production (when S3_BUCKET is set) this will POST to S3 using the AWS SDK.
- * In development / tests the file is written to ./uploads/ on disk and a
- * relative URL is returned.
+ * In production (when GCS_BUCKET is set) this will upload to Google Cloud Storage.
+ * In development / tests the file is written to ./uploads/ on disk.
  *
  * @param base64Data  Full data URI, e.g. "data:image/png;base64,..."
- * @param folder      S3 prefix / local subdirectory (e.g. "avatars", "projects")
+ * @param folder      GCS prefix / local subdirectory (e.g. "avatars", "projects")
  */
 export async function uploadImage(base64Data: string, folder = "uploads"): Promise<UploadResult> {
     // Validate basic data-URI shape.
@@ -31,8 +30,8 @@ export async function uploadImage(base64Data: string, folder = "uploads"): Promi
     const ext = mimeType.split("/")[1]?.replace("jpeg", "jpg") ?? "bin";
     const filename = `${crypto.randomUUID()}.${ext}`;
 
-    if (process.env.S3_BUCKET) {
-        return uploadToS3(base64Payload, folder, filename, mimeType);
+    if (process.env.GCS_BUCKET) {
+        return uploadToGCS(base64Payload, folder, filename, mimeType);
     }
     return saveLocally(base64Payload, folder, filename);
 }
@@ -47,31 +46,31 @@ async function saveLocally(base64Payload: string, folder: string, filename: stri
     return { url, key: null };
 }
 
-// s3 upload (production)
-async function uploadToS3(
+// Google Cloud Storage upload (production)
+async function uploadToGCS(
     base64Payload: string,
     folder: string,
     filename: string,
     contentType: string,
 ): Promise<UploadResult> {
-    // Dynamically import so S3_BUCKET=undefined environments don't need the SDK installed.
     // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const { S3Client, PutObjectCommand } = require("@aws-sdk/client-s3") as typeof import("@aws-sdk/client-s3");
+    const { Storage } = require("@google-cloud/storage") as typeof import("@google-cloud/storage");
 
-    const bucket = process.env.S3_BUCKET!;
-    const region = process.env.S3_REGION ?? "us-east-1";
+    const bucketName = process.env.GCS_BUCKET!;
     const key = `${folder}/${filename}`;
 
-    const client = new S3Client({ region });
-    await client.send(
-        new PutObjectCommand({
-            Bucket: bucket,
-            Key: key,
-            Body: Buffer.from(base64Payload, "base64"),
-            ContentType: contentType,
-        }),
-    );
+    const storage = new Storage();
+    const bucket = storage.bucket(bucketName);
+    const file = bucket.file(key);
 
-    const url = `https://${bucket}.s3.${region}.amazonaws.com/${key}`;
+    await file.save(Buffer.from(base64Payload, "base64"), {
+        metadata: { contentType },
+        resumable: false,
+    });
+
+    // Make the file public if the bucket permissions aren't already set to allUsers
+    // await file.makePublic(); 
+
+    const url = `https://storage.googleapis.com/${bucketName}/${key}`;
     return { url, key };
 }

@@ -91,7 +91,7 @@ export function UploadProjectModal({ onClose, existingTags }: UploadProjectModal
       tags: selectedTags,
       images: previews,
       project_url: link.trim(),
-      tech: selectedTags,
+      tech: [],
       highlights: []
     });
   }
