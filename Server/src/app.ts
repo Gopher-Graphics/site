@@ -59,7 +59,13 @@ app.get("/api/health", async (_req: Request, res: Response) => {
 // serve static frontend files in production
 if (process.env.NODE_ENV === "production") {
     const publicPath = path.join(__dirname, "..", "public");
-    app.use(express.static(publicPath));
+    app.use(express.static(publicPath, {
+        setHeaders: (res, path) => {
+            if (path.endsWith(".css")) {
+                res.setHeader("Content-Type", "text/css; charset=utf-8");
+            }
+        }
+    }));
     
     // fallback for react router
     app.get("/*any", (req: Request, res: Response) => {
