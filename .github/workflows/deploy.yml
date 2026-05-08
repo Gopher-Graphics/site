@@ -59,6 +59,6 @@ jobs:
             DB_NAME=gopher_graphics
             DB_HOST=/cloudsql/${{ env.PROJECT_ID }}:${{ env.REGION }}:${{ env.DB_INSTANCE }}
           secrets: |-
-            DB_PASSWORD=${{ secrets.DB_PASSWORD }}
-            JWT_SECRET=${{ secrets.JWT_SECRET }}
+            DB_PASSWORD=DB_PASSWORD:latest
+            JWT_SECRET=JWT_SECRET:latest
           flags: '--allow-unauthenticated --add-cloudsql-instances=${{ env.PROJECT_ID }}:${{ env.REGION }}:${{ env.DB_INSTANCE }}'
