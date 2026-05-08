@@ -39,8 +39,6 @@ export function UploadProjectModal({ onClose, existingTags }: UploadProjectModal
   const [showAllTags, setShowAllTags] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
-  if (!mounted) return null;
-
   const createMutation = useMutation({
     mutationFn: createProject,
     onSuccess: () => {
@@ -51,6 +49,8 @@ export function UploadProjectModal({ onClose, existingTags }: UploadProjectModal
       setError(err.message || "Failed to create project");
     }
   });
+
+  if (!mounted) return null;
 
   function handleFiles(files: FileList | File[]) {
     Array.from(files).filter(f => f.type.startsWith("image/")).forEach(file => {

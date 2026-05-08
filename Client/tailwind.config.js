@@ -3,6 +3,18 @@ export default {
   content: [
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
+    "./src/index.css",
+  ],
+  safelist: [
+    'modal-overlay',
+    'glass',
+    'glass-card',
+    'glass-dark',
+    'input-glass',
+    'shine-bar',
+    'btn-vista',
+    'btn-ghost',
+    'label-gold',
   ],
   theme: {
     extend: {
