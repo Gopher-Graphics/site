@@ -105,8 +105,7 @@ export function MessagesPage() {
   useEffect(() => { bottomRef.current?.scrollIntoView({ behavior:"smooth" }); }, [messages, activeTab]);
 
   // derived state
-  const joinedChannels = channels.filter(c => c.member_count && c.member_count > 0); // simplistic way to check joined, but actually backend returns `member_count`. Wait, backend GET /channels returns `member_count` but doesn't tell if *I* am a member. Oh! If I just joined it or if it's general... Let's just assume we show all channels for now, or just track joined locally.
-  const [localJoined, setLocalJoined] = useState<string[]>(["general"]);
+  const joinedChannels = channels.filter(c => c.is_member);
   
   const activeChannelObj = activeTab.type === "channel" ? channels.find(c => c.slug === activeTab.id) : null;
   
@@ -119,7 +118,6 @@ export function MessagesPage() {
   const joinMutation = useMutation({
     mutationFn: joinChannel,
     onSuccess: (_, slug) => {
-      setLocalJoined(prev => [...prev, slug]);
       queryClient.invalidateQueries({ queryKey: ["channels"] });
       queryClient.invalidateQueries({ queryKey: ["messages", "channel", slug] });
     }
@@ -128,7 +126,6 @@ export function MessagesPage() {
   const leaveMutation = useMutation({
     mutationFn: leaveChannel,
     onSuccess: (_, slug) => {
-      setLocalJoined(prev => prev.filter(s => s !== slug));
       queryClient.invalidateQueries({ queryKey: ["channels"] });
       if (activeTab.type === "channel" && activeTab.id === slug) {
         setActiveTab({ type: "channel", id: "general" });
@@ -139,7 +136,6 @@ export function MessagesPage() {
   const createChannelMutation = useMutation({
     mutationFn: createChannel,
     onSuccess: (newChannel) => {
-      setLocalJoined(prev => [...prev, newChannel.slug]);
       queryClient.invalidateQueries({ queryKey: ["channels"] });
       setActiveTab({ type: "channel", id: newChannel.slug });
       setShowNewChannel(false);
@@ -219,7 +215,7 @@ export function MessagesPage() {
         </div>
       </div>
       <div className="flex flex-col gap-0.5 flex-shrink-0">
-        {channels.filter(c => localJoined.includes(c.slug)).map(c => {
+        {joinedChannels.map(c => {
           const active = activeTab.type === "channel" && activeTab.id === c.slug;
           return (
             <button key={c.id} onClick={() => { setActiveTab({type:"channel",id:c.slug}); setShowSidebar(false); }}
@@ -511,7 +507,7 @@ export function MessagesPage() {
           <>
             <h3 className="font-ui text-white m-0 mb-4">Browse Channels</h3>
             <div className="flex flex-col gap-2 overflow-y-auto max-h-[60vh]">
-              {channels.filter(c => !localJoined.includes(c.slug)).map(c => (
+              {channels.filter(c => !c.is_member).map(c => (
                 <div key={c.id} className="flex items-center justify-between gap-3 px-3.5 py-2.5 rounded-lg" style={{ background:"rgba(255,255,255,.05)", border:"1px solid rgba(255,255,255,.1)" }}>
                   <div className="min-w-0">
                     <div className="font-ui text-white text-sm font-semibold">#{c.name}</div>
@@ -520,7 +516,7 @@ export function MessagesPage() {
                   <button onClick={() => joinMutation.mutate(c.slug)} disabled={joinMutation.isPending} className="btn-vista px-3 py-1.5 text-[12px] text-[#3a0008] flex-shrink-0">Join</button>
                 </div>
               ))}
-              {channels.filter(c => !localJoined.includes(c.slug)).length === 0 && (
+              {channels.filter(c => !c.is_member).length === 0 && (
                 <div className="font-ui text-center my-5" style={{ color:"rgba(255,255,255,.4)" }}>You have joined all available channels.</div>
               )}
             </div>

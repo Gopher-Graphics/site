@@ -37,3 +37,26 @@ export function requireAuth(req: Request, res: Response, next: NextFunction): vo
         res.status(401).json({ success: false, error: "Unauthorized – invalid or expired token" });
     }
 }
+
+export function optionalAuth(req: Request, _res: Response, next: NextFunction): void {
+    const auth = req.headers.authorization;
+    let token: string | undefined;
+    if (auth?.startsWith("Bearer ")) {
+        token = auth.slice(7);
+    } else if (req.cookies?.token) {
+        token = req.cookies.token as string;
+    }
+
+    if (!token) {
+        return next();
+    }
+
+    const JWT_SECRET = process.env.JWT_SECRET || "";
+    try {
+        const payload = jwt.verify(token, JWT_SECRET) as AuthPayload;
+        req.user = { id: payload.id, username: payload.username };
+    } catch {
+        // Just ignore invalid tokens in optional mode
+    }
+    next();
+}

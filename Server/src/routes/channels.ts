@@ -1,20 +1,23 @@
 import { Router, Request, Response } from "express";
 import pool from "../db";
-import { requireAuth } from "../middleware/auth";
+import { requireAuth, optionalAuth } from "../middleware/auth";
 import { ok, created, fail } from "../util/response";
 import { uploadImage } from "../util/upload";
 
 const router = Router();
 
 // list channels
-router.get("/", async (_req: Request, res: Response) => {
+router.get("/", optionalAuth, async (req: Request, res: Response) => {
+    const userId = req.user?.id;
     try {
         const result = await pool.query(
             `SELECT c.id, c.slug, c.name, c.description, c.created_at,
-                    COUNT(cm.user_id)::int AS member_count
+                    COUNT(DISTINCT cm_count.user_id)::int AS member_count,
+                    EXISTS(SELECT 1 FROM channel_members cm_check WHERE cm_check.channel_id = c.id AND cm_check.user_id = $1) AS is_member
              FROM channels c
-             LEFT JOIN channel_members cm ON cm.channel_id = c.id
+             LEFT JOIN channel_members cm_count ON cm_count.channel_id = c.id
              GROUP BY c.id ORDER BY c.name`,
+            [userId || null]
         );
         ok(res, result.rows);
     } catch (err) {

@@ -33,6 +33,7 @@ export interface Channel {
   description?: string;
   created_at?: string;
   member_count?: number;
+  is_member?: boolean;
 }
 
 export interface Message {
