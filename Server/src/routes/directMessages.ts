@@ -31,14 +31,21 @@ router.get("/conversations", requireAuth, async (req: Request, res: Response) =>
 // get conversation messages
 router.get("/:userId", requireAuth, async (req: Request, res: Response) => {
     const { userId } = req.params;
-    const { limit = "50", since } = req.query as Record<string, string>;
+    const { limit = "15", before, since } = req.query as Record<string, string>;
     const myId = req.user!.id;
 
     try {
-        const limitNum = Math.min(Math.max(parseInt(limit, 10) || 50, 1), 200);
+        const limitNum = Math.min(Math.max(parseInt(limit, 10) || 15, 1), 100);
         const params: unknown[] = [myId, userId, limitNum];
-        let sinceClause = "";
-        if (since) { params.push(since); sinceClause = `AND dm.created_at > $${params.length}`; }
+        let filterClause = "";
+        
+        if (before) { 
+            params.push(before); 
+            filterClause = `AND dm.created_at < $${params.length}`; 
+        } else if (since) { 
+            params.push(since); 
+            filterClause = `AND dm.created_at > $${params.length}`; 
+        }
 
         const result = await pool.query(
             `SELECT dm.id, dm.sender_id, dm.receiver_id, dm.text, dm.image_data, dm.created_at, dm.parent_id,
@@ -56,12 +63,12 @@ router.get("/:userId", requireAuth, async (req: Request, res: Response) => {
              WHERE (
                  (dm.sender_id = $1 AND dm.receiver_id = $2) OR
                  (dm.sender_id = $2 AND dm.receiver_id = $1)
-             ) ${sinceClause}
-             ORDER BY dm.created_at ASC
+             ) ${filterClause}
+             ORDER BY dm.created_at DESC
              LIMIT $3`,
             params,
         );
-        ok(res, result.rows);
+        ok(res, result.rows.reverse());
     } catch (err) {
         console.error("GET /direct-messages/:userId error:", err);
         fail(res, 500, "Internal server error");

@@ -131,7 +131,7 @@ router.post("/:slug/leave", requireAuth, async (req: Request, res: Response) => 
 
 // get channel messages
 router.get("/:slug/messages", requireAuth, async (req: Request, res: Response) => {
-    const { limit = "50", since } = req.query as Record<string, string>;
+    const { limit = "15", before, since } = req.query as Record<string, string>;
     try {
         const ch = await pool.query("SELECT id FROM channels WHERE slug = $1", [req.params.slug]);
         if (ch.rows.length === 0) { fail(res, 404, "Channel not found"); return; }
@@ -143,10 +143,17 @@ router.get("/:slug/messages", requireAuth, async (req: Request, res: Response) =
         );
         if (membership.rows.length === 0) { fail(res, 403, "Join channel to view messages"); return; }
 
-        const limitNum = Math.min(Math.max(parseInt(limit, 10) || 50, 1), 200);
+        const limitNum = Math.min(Math.max(parseInt(limit, 10) || 15, 1), 100);
         const params: unknown[] = [channelId, limitNum];
-        let sinceClause = "";
-        if (since) { params.push(since); sinceClause = `AND m.created_at > $${params.length}`; }
+        let filterClause = "";
+        
+        if (before) { 
+            params.push(before); 
+            filterClause = `AND m.created_at < $${params.length}`; 
+        } else if (since) { 
+            params.push(since); 
+            filterClause = `AND m.created_at > $${params.length}`; 
+        }
 
         const result = await pool.query(
             `SELECT m.id, m.message_type, m.text, m.image_data, m.created_at, m.parent_id,
@@ -158,11 +165,13 @@ router.get("/:slug/messages", requireAuth, async (req: Request, res: Response) =
              JOIN users u ON u.id = m.author_id
              LEFT JOIN channel_messages pm ON pm.id = m.parent_id
              LEFT JOIN users pu ON pu.id = pm.author_id
-             WHERE m.channel_id = $1 ${sinceClause}
-             ORDER BY m.created_at ASC LIMIT $2`,
+             WHERE m.channel_id = $1 ${filterClause}
+             ORDER BY m.created_at DESC LIMIT $2`,
             params,
         );
-        ok(res, result.rows);
+        
+        // Return latest messages at the end for the frontend
+        ok(res, result.rows.reverse());
     } catch (err) {
         console.error("messages error:", err);
         fail(res, 500, "Internal server error");

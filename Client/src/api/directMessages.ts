@@ -10,10 +10,11 @@ export interface Conversation {
   last_message_at: string;
 }
 
-export async function getDirectMessages(userId: string, limit: number = 50, since?: string) {
+export async function getDirectMessages(userId: string, limit: number = 15, options?: { before?: string; since?: string }) {
   const query = new URLSearchParams();
   query.append("limit", String(limit));
-  if (since) query.append("since", since);
+  if (options?.before) query.append("before", options.before);
+  if (options?.since) query.append("since", options.since);
   
   return get<Message[]>(`/direct-messages/${userId}?${query.toString()}`);
 }

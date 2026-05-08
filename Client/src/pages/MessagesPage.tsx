@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, ReactNode } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "../contexts/AuthContext";
 import { getChannels, getChannelMessages, joinChannel, leaveChannel, postChannelMessage, createChannel, deleteChannelMessage } from "../api/channels";
 import { getImageUrl } from "../api/http";
@@ -92,18 +92,68 @@ export function MessagesPage() {
     enabled: activeTab.type === "dm" && !!activeTab.id,
   });
 
-  // fetch messages for active tab
-  const { data: messages = [] } = useQuery({
+  // fetch messages for active tab with infinite scroll
+  const {
+    data: infiniteData,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    isLoading
+  } = useInfiniteQuery({
     queryKey: ["messages", activeTab.type, activeTab.id],
-    queryFn: () => activeTab.type === "channel" 
-      ? getChannelMessages(activeTab.id)
-      : getDirectMessages(activeTab.id),
+    queryFn: ({ pageParam }) => {
+      const options = pageParam ? { before: pageParam as string } : {};
+      return activeTab.type === "channel"
+        ? getChannelMessages(activeTab.id, 15, options)
+        : getDirectMessages(activeTab.id, 15, options);
+    },
+    initialPageParam: undefined as string | undefined,
+    getNextPageParam: (lastPage) => {
+      if (!lastPage || lastPage.length < 15) return undefined;
+      // lastPage is already reversed by backend, so lastPage[0] is the oldest in this batch
+      return lastPage[0]?.created_at;
+    },
     enabled: !!activeTab.id,
-    refetchInterval: 3000, // poll for new messages every 3s
+    refetchInterval: 3000, // Poll for newest batch
   });
 
-  useEffect(() => { bottomRef.current?.scrollIntoView({ behavior:"smooth" }); }, [messages, activeTab]);
+  const messages = infiniteData ? infiniteData.pages.flat().sort((a, b) => 
+    new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+  ) : [];
 
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const [shouldScrollToBottom, setShouldScrollToBottom] = useState(true);
+
+  // Handle scroll for infinite loading
+  const handleScroll = () => {
+    const el = scrollContainerRef.current;
+    if (!el) return;
+
+    // If at the top, fetch older messages
+    if (el.scrollTop === 0 && hasNextPage && !isFetchingNextPage) {
+      // Save height to maintain scroll position
+      const previousHeight = el.scrollHeight;
+      fetchNextPage().then(() => {
+        // After loading, adjust scroll so we stay at the same message
+        setTimeout(() => {
+          if (scrollContainerRef.current) {
+            const newHeight = scrollContainerRef.current.scrollHeight;
+            scrollContainerRef.current.scrollTop = newHeight - previousHeight;
+          }
+        }, 0);
+      });
+    }
+
+    // Check if user is near bottom
+    const isAtBottom = el.scrollHeight - el.scrollTop <= el.clientHeight + 100;
+    setShouldScrollToBottom(isAtBottom);
+  };
+
+  useEffect(() => {
+    if (shouldScrollToBottom) {
+      bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [messages, shouldScrollToBottom]);
   // derived state
   const joinedChannels = channels.filter(c => c.is_member);
   
@@ -349,8 +399,16 @@ export function MessagesPage() {
         </div>
 
         {/* Messages */}
-        <div className="flex-1 overflow-y-auto min-h-0 flex flex-col gap-0" style={{ padding: isMobile ? "14px 12px" : "20px 24px" }}>
-          {messages.length === 0 && (
+        <div 
+          ref={scrollContainerRef}
+          onScroll={handleScroll}
+          className="flex-1 overflow-y-auto min-h-0 flex flex-col gap-0" 
+          style={{ padding: isMobile ? "14px 12px" : "20px 24px" }}>
+          
+          {isFetchingNextPage && (
+            <div className="text-center py-4 font-ui text-[11px] text-gold/40 animate-pulse">Loading older messages...</div>
+          )}
+          {messages.length === 0 && !isLoading && (
             <div className="m-auto text-center opacity-50">
               <div className="font-ui text-white text-base font-semibold">No messages yet</div>
               <div className="font-ui text-white text-[13px]">Be the first to say hello!</div>
