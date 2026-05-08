@@ -4,6 +4,8 @@ import react from '@vitejs/plugin-react'
 export default defineConfig({
   plugins: [react()],
   build: {
-    target: 'esnext'
+    target: 'esnext',
+    minify: false,
+    cssMinify: false
   }
 })
