@@ -103,7 +103,7 @@ export function UploadProjectModal({ onClose, existingTags }: UploadProjectModal
       {croppingImg && <ImageCropper key={croppingImg} src={croppingImg} onCrop={handleCropComplete} onCancel={() => setCroppingImg(null)} />}
 
       <div className="glass w-[min(720px,94vw)] max-h-[92vh] overflow-y-auto animate-[modalIn_.25s_cubic-bezier(.34,1.46,.64,1)]"
-        style={{ backgroundImage:"linear-gradient(168deg, rgba(255,255,255,.2) 0%, rgba(255,255,255,.06) 40%, rgba(122,0,25,.06) 100%)" }}
+        style={{ borderRadius:18, clipPath:"inset(0 round 18px)", backgroundImage:"linear-gradient(168deg, rgba(255,255,255,.2) 0%, rgba(255,255,255,.06) 40%, rgba(122,0,25,.06) 100%)" }}
         onClick={e => e.stopPropagation()}>
         <div className="shine-bar" style={{ borderRadius:18 }} />
 
