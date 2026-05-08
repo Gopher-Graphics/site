@@ -84,7 +84,7 @@ export function Nav({ user, onSignIn }: NavProps) {
   return (
     <div className="sticky top-0 z-[100] flex justify-center px-4 pt-[18px]">
       <nav className="glass flex items-center gap-2 flex-wrap px-3.5 py-2"
-        style={{ borderRadius:"40px", boxShadow:"0 8px 48px rgba(80,0,15,.35), 0 1.5px 0 rgba(255,255,255,.7) inset, 0 -1px 0 rgba(255,204,51,.1) inset" }}>
+        style={{ borderRadius:"40px", clipPath:"inset(0 round 40px)", boxShadow:"0 8px 48px rgba(80,0,15,.35), 0 1.5px 0 rgba(255,255,255,.7) inset, 0 -1px 0 rgba(255,204,51,.1) inset" }}>
         <div className="shine-bar" style={{ borderRadius:"40px" }} />
 
         {/* Logo */}

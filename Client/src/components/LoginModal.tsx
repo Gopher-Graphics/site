@@ -59,7 +59,7 @@ export function LoginModal({ onClose }: LoginModalProps) {
   return createPortal(
     <div className="modal-overlay" onClick={onClose}>
       <div className="glass w-[min(400px,92vw)] px-[clamp(20px,5vw,32px)] py-9 relative"
-        style={{ backgroundImage:"linear-gradient(168deg, rgba(255,255,255,.2) 0%, rgba(255,255,255,.08) 40%, rgba(122,0,25,.08) 100%)", animation: shaking ? "shake .4s ease" : "modalIn .22s cubic-bezier(.34,1.56,.64,1)" }}
+        style={{ borderRadius:18, clipPath:"inset(0 round 18px)", backgroundImage:"linear-gradient(168deg, rgba(255,255,255,.2) 0%, rgba(255,255,255,.08) 40%, rgba(122,0,25,.08) 100%)", animation: shaking ? "shake .4s ease" : "modalIn .22s cubic-bezier(.34,1.56,.64,1)" }}
         onClick={e => e.stopPropagation()}>
         <div className="shine-bar" style={{ borderRadius:18 }} />
 
