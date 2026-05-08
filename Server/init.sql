@@ -6,20 +6,30 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 -- USERS
 CREATE TABLE users (
     id              UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    x500            VARCHAR(50)  NOT NULL UNIQUE,   
-    password_hash   VARCHAR(255) NOT NULL,          -- bcrypt
-    name            VARCHAR(100) NOT NULL,          -- display name, editable
-    role            VARCHAR(50)  NOT NULL DEFAULT 'Member',  -- e.g. President, Officer, Member
-    avatar_url      TEXT,                           -- URL for profile picture
+    username        VARCHAR(50)  NOT NULL UNIQUE,   
+    password_hash   VARCHAR(255) NOT NULL,          
+    name            VARCHAR(100) NOT NULL,        
+    role            VARCHAR(50)  NOT NULL DEFAULT 'Member',
+    avatar_url      TEXT,                          
     member_since    DATE         NOT NULL DEFAULT CURRENT_DATE,
     created_at      TIMESTAMPTZ  NOT NULL DEFAULT NOW(),
-    updated_at      TIMESTAMPTZ  NOT NULL DEFAULT NOW()
+    updated_at      TIMESTAMPTZ  NOT NULL DEFAULT NOW(),
+    avatar_id       INT DEFAULT -1,
+    -- Extended profile (all optional, hidden until set)
+    major           VARCHAR(150),
+    github_url      TEXT,
+    linkedin_url    TEXT,
+    other_url       TEXT,
+    fav_language    VARCHAR(100),
+    fav_class       VARCHAR(150),
+    fav_professor   VARCHAR(150),
+    fav_game        VARCHAR(150),
+    fav_graphics_topic VARCHAR(150),
+    fav_custom      VARCHAR(200),
+    least_fav_language VARCHAR(100),
+    operating_system VARCHAR(100),
+    graphics_software VARCHAR(150)
 );
-
--- Index for fast login lookup
-CREATE INDEX idx_users_x500 ON users(x500);
-
-
 
 -- PROJECTS
 CREATE TABLE projects (
@@ -127,6 +137,7 @@ CREATE TABLE channel_messages (
     message_type    VARCHAR(20)  NOT NULL DEFAULT 'user' CHECK (message_type IN ('user', 'system_join', 'system_leave')),
     text            TEXT,                             -- message body
     image_data      TEXT,                             -- image url
+    parent_id       UUID         REFERENCES channel_messages(id) ON DELETE SET NULL, -- for replies
     created_at      TIMESTAMPTZ  NOT NULL DEFAULT NOW()
 );
 
@@ -141,6 +152,7 @@ CREATE TABLE direct_messages (
     receiver_id     UUID         NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     text            TEXT,                             -- message body
     image_data      TEXT,                             -- base64 image data stored directly
+    parent_id       UUID         REFERENCES direct_messages(id) ON DELETE SET NULL, -- for replies
     created_at      TIMESTAMPTZ  NOT NULL DEFAULT NOW(),
     CONSTRAINT dm_no_self_message CHECK (sender_id != receiver_id)
 );

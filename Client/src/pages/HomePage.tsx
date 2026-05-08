@@ -1,8 +1,8 @@
-import React from "react";
 import { useNavigate } from "react-router-dom";
+import { AssetIcon, type AssetIconName } from "../components/AssetIcon";
 
 interface FeatureCard {
-  icon: string;
+  icon: AssetIconName;
   title: string;
   desc: string;
 }
@@ -11,10 +11,10 @@ export function HomePage() {
   const navigate = useNavigate();
 
   const cards: FeatureCard[] = [
-    { icon:"WS",  title:"Weekly Workshops",     desc:"Learn shaders, rendering algorithms, and graphics APIs together." },
-    { icon:"GFX", title:"Project Showcases",     desc:"Present your work and get feedback from fellow Gophers." },
-    { icon:"CUP", title:"Competitions",          desc:"Join demoscene competitions and game jams as a team." },
-    { icon:"NET", title:"Industry Connections",  desc:"Network with alumni at studios and tech companies." },
+    { icon:"lab", title:"Workshops", desc:"Learn about shaders, rendering algorithms, and much more together." },
+    { icon:"showcase", title:"Project Showcases", desc:"Present your work and get feedback from fellow members." },
+    { icon:"competition", title:"Competitions", desc:"Join demoscene competitions and more." },
+    { icon:"network", title:"Make Connections", desc:"Network with other members interested in computer graphics." },
   ];
 
   return (
@@ -58,7 +58,7 @@ export function HomePage() {
             onMouseOver={e => { e.currentTarget.style.transform="translateY(-5px)"; e.currentTarget.style.boxShadow="0 6px 32px rgba(80,0,15,0.22),0 1.5px 0 rgba(255,255,255,0.65) inset,0 -1px 0 rgba(255,204,51,0.1) inset,0 0 20px rgba(255,204,51,0.3)"; }}
             onMouseOut={e  => { e.currentTarget.style.transform=""; e.currentTarget.style.boxShadow=""; }}>
             <div className="shine-bar" />
-            <div className="icon-badge mb-2.5 relative">{f.icon}</div>
+            <AssetIcon name={f.icon} size={28} className="mb-2.5 relative" />
             <h3 className="font-ui text-white font-bold text-[15px] mb-2 relative">{f.title}</h3>
             <p className="font-ui text-[13px] m-0 leading-[1.55] relative" style={{ color:"rgba(255,225,195,.7)" }}>{f.desc}</p>
           </div>

@@ -1,4 +1,7 @@
 import { useState, useRef, useEffect } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { createProject } from "../api/projects";
+import { AssetIcon } from "./AssetIcon";
 import { ImageCropper } from "./ImageCropper";
 
 const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
@@ -7,11 +10,11 @@ const YEARS = Array.from({ length: 6 }, (_, i) => currentYear - i);
 
 interface UploadProjectModalProps {
   onClose: () => void;
-  onSubmit: (_project: any) => void;
   existingTags: string[];
 }
 
-export function UploadProjectModal({ onClose, onSubmit, existingTags }: UploadProjectModalProps) {
+export function UploadProjectModal({ onClose, existingTags }: UploadProjectModalProps) {
+  const queryClient = useQueryClient();
   const [title, setTitle]             = useState("");
   const [desc, setDesc]               = useState("");
   const [longDesc, setLongDesc]       = useState("");
@@ -25,7 +28,19 @@ export function UploadProjectModal({ onClose, onSubmit, existingTags }: UploadPr
   const [dragOver, setDragOver]       = useState(false);
   const [croppingImg, setCroppingImg] = useState<string | null>(null);
   const [cropQueue, setCropQueue]     = useState<string[]>([]);
+  const [showAllTags, setShowAllTags] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
+
+  const createMutation = useMutation({
+    mutationFn: createProject,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["projects"] });
+      onClose();
+    },
+    onError: (err: any) => {
+      setError(err.message || "Failed to create project");
+    }
+  });
 
   function handleFiles(files: FileList | File[]) {
     Array.from(files).filter(f => f.type.startsWith("image/")).forEach(file => {
@@ -42,7 +57,6 @@ export function UploadProjectModal({ onClose, onSubmit, existingTags }: UploadPr
 
   useEffect(() => {
     if (!croppingImg && cropQueue.length > 0) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       setCroppingImg(cropQueue[0]);
       setCropQueue(prev => prev.slice(1));
     }
@@ -57,11 +71,22 @@ export function UploadProjectModal({ onClose, onSubmit, existingTags }: UploadPr
     if (!title.trim()) { setError("Title is required"); return; }
     if (!desc.trim())  { setError("Short description is required"); return; }
     if (selectedTags.length === 0) { setError("Select at least one tag"); return; }
-    onSubmit({ id:Date.now(), title:title.trim(), desc:desc.trim(), longDesc:longDesc.trim()||desc.trim(), date:`${month} ${year}`, tags:selectedTags, images:previews, img:previews[0]||null, github:link.trim(), tech:selectedTags, preview:[] });
-    onClose();
+    
+    createMutation.mutate({
+      title: title.trim(),
+      description: desc.trim(),
+      long_description: longDesc.trim() || desc.trim(),
+      date_label: `${month} ${year}`,
+      tags: selectedTags,
+      images: previews,
+      project_url: link.trim(),
+      tech: selectedTags,
+      highlights: []
+    });
   }
 
   const selectCls = "input-glass appearance-none pr-8 cursor-pointer";
+  const isPending = createMutation.isPending;
 
   return (
     <div className="modal-overlay" onClick={onClose}>
@@ -79,7 +104,7 @@ export function UploadProjectModal({ onClose, onSubmit, existingTags }: UploadPr
         </div>
 
         {/* Form */}
-        <div className="px-[clamp(20px,5vw,32px)] pt-5 pb-[clamp(24px,5vw,32px)] flex flex-col gap-[18px] relative">
+        <div className={`px-[clamp(20px,5vw,32px)] pt-5 pb-[clamp(24px,5vw,32px)] flex flex-col gap-[18px] relative ${isPending ? 'opacity-70 pointer-events-none' : ''}`}>
           <div>
             <label className="label-gold">Project Title *</label>
             <input className="input-glass" value={title} onChange={e => { setTitle(e.target.value); setError(""); }} placeholder="e.g. Real-Time Ray Tracer" />
@@ -102,7 +127,7 @@ export function UploadProjectModal({ onClose, onSubmit, existingTags }: UploadPr
               onDragLeave={() => setDragOver(false)}
               onDrop={e => { e.preventDefault(); setDragOver(false); if (e.dataTransfer.files) handleFiles(e.dataTransfer.files); }}
               onClick={() => fileRef.current?.click()}>
-              <div className="icon-badge mb-2 mx-auto">IMG</div>
+              <AssetIcon name="picture" size={28} className="mb-2 mx-auto" />
               <p className="font-ui text-[14px] m-0" style={{ color:"rgba(255,225,195,.65)" }}>Drag &amp; drop images here or <span className="text-gold font-semibold">click to browse</span></p>
               <p className="font-ui text-[11px] mt-1 m-0" style={{ color:"rgba(255,210,170,.35)" }}>PNG, JPG, GIF up to 10MB each</p>
               <input ref={fileRef} type="file" accept="image/*" multiple className="hidden" onChange={e => { if (e.target.files) handleFiles(e.target.files); }} />
@@ -152,7 +177,7 @@ export function UploadProjectModal({ onClose, onSubmit, existingTags }: UploadPr
           <div>
             <label className="label-gold">Tags *</label>
             <div className="flex gap-2 flex-wrap mb-2.5">
-              {existingTags.map(tag => {
+              {(showAllTags ? existingTags : existingTags.slice(0, 6)).map(tag => {
                 const active = selectedTags.includes(tag);
                 return (
                   <button key={tag} onClick={() => toggleTag(tag)}
@@ -161,6 +186,12 @@ export function UploadProjectModal({ onClose, onSubmit, existingTags }: UploadPr
                   </button>
                 );
               })}
+              {existingTags.length > 6 && (
+                <button onClick={() => setShowAllTags(!showAllTags)}
+                  className="px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-gold hover:underline">
+                  {showAllTags ? "Show Less" : `Show All (${existingTags.length})`}
+                </button>
+              )}
             </div>
             {selectedTags.filter(t => !existingTags.includes(t)).length > 0 && (
               <div className="flex gap-2 flex-wrap mb-2.5">
@@ -186,8 +217,10 @@ export function UploadProjectModal({ onClose, onSubmit, existingTags }: UploadPr
           )}
 
           <div className="flex gap-3 mt-1">
-            <button onClick={handleSubmit} className="btn-vista flex-1 py-3.5 text-[15px] text-[#3a0008]">Upload Project</button>
-            <button onClick={onClose}      className="btn-ghost px-7 py-3.5 text-[15px]">Cancel</button>
+            <button onClick={handleSubmit} className="btn-vista flex-1 py-3.5 text-[15px] text-[#3a0008]">
+              {isPending ? "Uploading..." : "Upload Project"}
+            </button>
+            <button onClick={onClose} className="btn-ghost px-7 py-3.5 text-[15px]">Cancel</button>
           </div>
         </div>
 

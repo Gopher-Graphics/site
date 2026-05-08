@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
+import { getImageUrl } from "../api/http";
 import { User } from "../types";
 
 interface NavProps {
@@ -35,11 +36,11 @@ export function Nav({ user, onSignIn }: NavProps) {
   const activeLinkClass = "btn-vista px-[18px] py-[7px] text-[13px] text-[#3a0008] capitalize";
   const inactiveLinkClass = "btn-vista px-[18px] py-[7px] text-[13px] text-[rgba(80,20,0,0.85)] capitalize";
 
-  // Mobile nav
+  // mobile nav
   if (isMobile) {
     return (
       <>
-        <nav className="fixed top-0 left-0 right-0 z-[100] flex items-center justify-between px-4 py-3"
+        <nav className="sticky top-0 left-0 right-0 z-[100] flex items-center justify-between px-4 py-3"
           style={{ background:"linear-gradient(180deg, rgba(40,0,10,0.85), rgba(20,0,5,0.75))", backdropFilter:"blur(24px) saturate(1.8)", WebkitBackdropFilter:"blur(24px) saturate(1.8)", borderBottom:"1px solid rgba(255,255,255,0.2)", boxShadow:"0 4px 24px rgba(0,0,0,0.4), 0 1px 0 rgba(255,255,255,0.15) inset" }}>
           <div onClick={() => navTo("home")} className="cursor-pointer">
             <span className="font-ui font-bold text-base text-white" style={{ textShadow:"0 1px 12px rgba(255,204,51,.5)" }}>Gopher Graphics</span>
@@ -65,7 +66,7 @@ export function Nav({ user, onSignIn }: NavProps) {
               <div className="flex items-center gap-2.5 px-4 py-2.5 rounded-xl"
                 style={{ background:"rgba(255,204,51,.1)", border:"1px solid rgba(255,204,51,.25)" }}>
                 <div className="w-7 h-7 rounded-full overflow-hidden flex-shrink-0" style={{ border:"1px solid rgba(255,204,51,0.4)" }}>
-                  <img src={user.avatar} alt={user.name} className="w-full h-full object-cover" />
+                  <img src={getImageUrl(user.avatar_url) || ""} alt={user.name} className="w-full h-full object-cover" />
                 </div>
                 <span className="font-ui text-gold text-sm font-semibold">{user.name}</span>
               </div>
@@ -79,7 +80,7 @@ export function Nav({ user, onSignIn }: NavProps) {
     );
   }
 
-  // Desktop nav
+  // desktop nav
   return (
     <div className="sticky top-0 z-[100] flex justify-center px-4 pt-[18px]">
       <nav className="glass flex items-center gap-2 flex-wrap px-3.5 py-2"
@@ -115,7 +116,7 @@ export function Nav({ user, onSignIn }: NavProps) {
             <div className="flex items-center gap-1.5 pl-1.5 pr-3 py-1 rounded-full"
               style={{ background:"rgba(255,204,51,.12)", border:"1px solid rgba(255,204,51,.3)" }}>
               <div className="w-6 h-6 rounded-full overflow-hidden" style={{ border:"1px solid rgba(255,204,51,0.2)" }}>
-                <img src={user.avatar} alt={user.name} className="w-full h-full object-cover" />
+                <img src={getImageUrl(user.avatar_url) || ""} alt={user.name} className="w-full h-full object-cover" />
               </div>
               <span className="font-ui text-gold text-[13px] font-semibold">{user.name.split(" ")[0]}</span>
             </div>

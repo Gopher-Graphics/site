@@ -1,46 +1,73 @@
+
+
 export interface User {
-  x500: string;
-  password?: string;
+  id: string;
+  username: string;
   name: string;
   role: string;
-  avatar?: string;
-  bio?: string;
-  location?: string;
+  avatar_url?: string | null;
+  avatar_id?: number;
+  member_since?: string;
+  created_at?: string;
+  updated_at?: string;
+
+  major?: string | null;
+  github_url?: string | null;
+  linkedin_url?: string | null;
+  other_url?: string | null;
+  fav_language?: string | null;
+  fav_class?: string | null;
+  fav_professor?: string | null;
+  fav_game?: string | null;
+  fav_graphics_topic?: string | null;
+  fav_custom?: string | null;
+  least_fav_language?: string | null;
+  operating_system?: string | null;
+  graphics_software?: string | null;
 }
 
 export interface Channel {
   id: string;
+  slug: string;
   name: string;
-  desc: string;
+  description?: string;
+  created_at?: string;
+  member_count?: number;
 }
 
 export interface Message {
-  id: number;
-  author: string;
+  id: string;
+  author_id?: string;
+  author_username?: string;
+  author_name?: string;
+  author_avatar?: string | null;
+  message_type?: "user" | "system_join" | "system_leave";
   text?: string;
-  time: string;
-  replyTo?: number;
-  avatar?: string;
-  isMe?: boolean;
-  type?: "system_join" | "system_leave";
   image_data?: string | null;
-  replyToMsg?: Message | null;
+  parent_id?: string | null;
+  parent_text?: string | null;
+  parent_image?: string | null;
+  parent_author_name?: string | null;
+  created_at: string;
 }
 
 export interface Project {
-  id: number;
+  id: string;
   title: string;
-  author: string;
-  tags: string[];
-  desc: string;
-  date: string;
-  longDesc: string;
-  tech: string[];
-  github: string;
-  preview: string[];
-  images?: string[];
-  img?: string | null;
-}
+  description: string;
+  long_description?: string;
+  project_url?: string;
+  date_label?: string;
+  created_at?: string;
+  updated_at?: string;
+  author_id?: string;
+  author_username?: string;
+  author_name?: string;
+  author_avatar?: string | null;
+  tags?: { name: string }[] | string[];
+  thumbnail?: string | null;
 
-export type MessagesByChannel = Record<string, Message[]>;
-export type DirectMessages = Record<string, Message[]>;
+  images?: { id: string; image_url: string; display_order: number }[];
+  tech?: { id: string; name: string; display_order: number }[];
+  highlights?: { id: string; description: string; display_order: number }[];
+}
